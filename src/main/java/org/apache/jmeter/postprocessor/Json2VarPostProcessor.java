@@ -1,4 +1,4 @@
-package ckt.apache.jmeter.postprocessor;
+package org.apache.jmeter.postprocessor;
 
 import java.io.Serializable;
 import java.util.Map.Entry;

@@ -1,4 +1,4 @@
-package ckt.apache.jmeter.functions;
+package org.apache.jmeter.functions;
 
 import java.util.Collection;
 import java.util.LinkedList;

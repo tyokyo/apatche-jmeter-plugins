@@ -1,4 +1,4 @@
-package ckt.apache.jmeter.java;
+package org.apache.jmeter.java;
 
 /* 
  * 一般来说，扩展java请求通常需要的类有： 

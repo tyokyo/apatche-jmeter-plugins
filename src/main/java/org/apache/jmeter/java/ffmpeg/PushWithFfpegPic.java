@@ -1,4 +1,4 @@
-package ckt.apache.jmeter.java.ffmpeg;
+package org.apache.jmeter.java.ffmpeg;
  
  import org.apache.jmeter.config.Arguments;
  import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
@@ -7,14 +7,15 @@ package ckt.apache.jmeter.java.ffmpeg;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
  
- public class PushwithFfmpeg extends AbstractJavaSamplerClient
+ public class PushWithFfpegPic extends AbstractJavaSamplerClient
  {
-   private static final Logger logger = LoggerFactory.getLogger(PushwithFfmpeg.class);
+   private static final Logger logger = LoggerFactory.getLogger(PushWithFfpegPic.class);
  
    public void setupTest(JavaSamplerContext arg0)
    {
      logger.info("======================================start=====================================");
    }
+ 
    public void teardownTest(JavaSamplerContext arg0)
    {
      logger.info("======================================end=====================================");
@@ -25,7 +26,7 @@ package ckt.apache.jmeter.java.ffmpeg;
      Arguments args = new Arguments();
      args.addArgument("ffmpeg", "");
      args.addArgument("pushurl", "${pushurl}");
-    args.addArgument("videopath", "");
+     args.addArgument("videopath", "");
      return args;
    }
  
@@ -35,15 +36,15 @@ package ckt.apache.jmeter.java.ffmpeg;
      SampleResult sr = new SampleResult();
      sr.setSampleLabel("ffmpeg_push");
  
-     sr.sampleStart();
+    sr.sampleStart();
      FfmpegUtil ffmpegUtil = new FfmpegUtil();
-     String[] strarray = ffmpegUtil.Push(arg0.getParameter("ffmpeg"), arg0.getParameter("videopath"), 
-       arg0.getParameter("pushurl"));
+     String[] strarray = ffmpegUtil.PushPicture(arg0.getParameter("ffmpeg"), arg0.getParameter("videopath"), 
+     arg0.getParameter("pushurl"));
      sr.sampleEnd();
  
      if (ffmpegUtil.getExitValue() == 1) {
-    	 sr.setRequestHeaders(
-         "ffmpeg:  " + arg0.getParameter("ffmpeg").toString() + "\n" + 
+       sr.setRequestHeaders(
+       "ffmpeg:  " + arg0.getParameter("ffmpeg").toString() + "\n" + 
          "pushurl:  " + arg0.getParameter("pushurl").toString() + "\n" + 
          "videopath  :" + arg0.getParameter("videopath").toString());
  
@@ -52,7 +53,7 @@ package ckt.apache.jmeter.java.ffmpeg;
        sr.setDataType("text");
        sr.setSuccessful(false);
      }
-    else if (ffmpegUtil.getExitValue() == 0) {
+     else if (ffmpegUtil.getExitValue() == 0) {
        sr.setRequestHeaders(
          "ffmpeg:  " + arg0.getParameter("ffmpeg").toString() + "\n" + 
          "pushurl:  " + arg0.getParameter("pushurl").toString() + "\n" + 
@@ -64,7 +65,7 @@ package ckt.apache.jmeter.java.ffmpeg;
        sr.setSuccessful(true);
      } else if (ffmpegUtil.getExitValue() == -1) {
        sr.setRequestHeaders(
-        "ffmpeg:  " + arg0.getParameter("ffmpeg").toString() + "\n" + 
+         "ffmpeg:  " + arg0.getParameter("ffmpeg").toString() + "\n" + 
          "pushurl:  " + arg0.getParameter("pushurl").toString() + "\n" + 
          "videopath:  " + arg0.getParameter("videopath").toString());
  
@@ -78,10 +79,9 @@ package ckt.apache.jmeter.java.ffmpeg;
  
    public static void main(String[] args) {
      FfmpegUtil ffmpegUtil = new FfmpegUtil();
-     String[] str = ffmpegUtil.Push("D:/Jmeter/jmeter/ffmpeg-20160629-57d30fd-win64-static/bin", "C:/Users/admin/Desktop/video/mb.mp4", 
-       "rtmp://push.live.sioeye.cn/sioeyecn/qmyABr-734c6259b2af44328ae1dcf253b058bd?liveId=734c6259b2af44328ae1dcf253b058bd");
+     String[] str = ffmpegUtil.PushPicture("D:/Jmeter/jmeter/ffmpeg-20160629-57d30fd-win64-static/bin", "C:/Users/admin/Desktop/ycb.jpg", 
+       "rtmp://push.live.sioeye.cn/sioeyecn/MjEZBf-4dd3a3870ade4755a4f9b832a7f606fb?liveId=4dd3a3870ade4755a4f9b832a7f606fb");
  
      System.out.println(str[0] + "\n" + str[1]);
    }
  }
-

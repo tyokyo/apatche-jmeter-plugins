@@ -1,4 +1,4 @@
-package ckt.apache.jmeter.postprocessor.gui;
+package org.apache.jmeter.postprocessor.gui;
 
 import java.awt.BorderLayout;
 
@@ -14,8 +14,7 @@ import org.apache.jmeter.gui.util.VerticalPanel;
 import org.apache.jmeter.processor.gui.AbstractPostProcessorGui;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jorphan.gui.JLabeledTextArea;
-
-import ckt.apache.jmeter.postprocessor.Json2VarPostProcessor;
+import org.apache.jmeter.postprocessor.Json2VarPostProcessor;
 
 public class Json2VarPostProcessorGui extends AbstractPostProcessorGui{
 	private static final long serialVersionUID = 1L;

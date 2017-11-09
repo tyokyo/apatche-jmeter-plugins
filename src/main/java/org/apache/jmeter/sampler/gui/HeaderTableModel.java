@@ -1,4 +1,4 @@
-package ckt.apache.jmeter.sampler.gui;
+package org.apache.jmeter.sampler.gui;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

@@ -1,4 +1,4 @@
-package ckt.apache.jmeter.sampler;
+package org.apache.jmeter.sampler;
 
 import org.apache.jmeter.samplers.AbstractSampler;
 import org.apache.jmeter.samplers.Entry;

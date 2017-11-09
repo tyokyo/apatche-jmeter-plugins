@@ -1,4 +1,4 @@
-package ckt.apache.jmeter.functions;
+package org.apache.jmeter.functions;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

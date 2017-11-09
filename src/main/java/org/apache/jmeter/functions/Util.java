@@ -1,4 +1,4 @@
-package ckt.apache.jmeter.functions;
+package org.apache.jmeter.functions;
 
 import java.io.File;
 import java.io.FileInputStream;

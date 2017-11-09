@@ -1,4 +1,4 @@
-package ckt.apache.jmeter.java.ffmpeg;
+package org.apache.jmeter.java.ffmpeg;
 
 import java.io.IOException;
 import org.slf4j.Logger;

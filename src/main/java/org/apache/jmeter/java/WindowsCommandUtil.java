@@ -1,4 +1,4 @@
-package ckt.apache.jmeter.java;
+package org.apache.jmeter.java;
 
 import java.io.IOException;
 import java.util.Scanner;

@@ -1,4 +1,4 @@
-package ckt.apache.jmeter.sampler.gui;
+package org.apache.jmeter.sampler.gui;
 
 import java.util.HashMap;
 
@@ -19,8 +19,7 @@ import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jorphan.gui.JLabeledTextField;
 import org.apache.jorphan.gui.layout.VerticalLayout;
-
-import ckt.apache.jmeter.sampler.ApiSampler;
+import org.apache.jmeter.sampler.ApiSampler;
 
 public class ApiSamplerGUI extends AbstractSamplerGui{
 	private static final long serialVersionUID = 1L;
