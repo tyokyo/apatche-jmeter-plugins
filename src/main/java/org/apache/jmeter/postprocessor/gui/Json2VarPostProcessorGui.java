@@ -49,15 +49,6 @@ public class Json2VarPostProcessorGui extends AbstractPostProcessorGui{
 		textPanel.add(textArea);
 		//textPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),"user guide")); 
 		vertPanel.add(textPanel);
-
-
-	}
-	@Override
-	public TestElement createTestElement() {
-		// TODO Auto-generated method stub
-		Json2VarPostProcessor json2VarPostProcessor = new Json2VarPostProcessor();
-		modifyTestElement(json2VarPostProcessor);
-		return json2VarPostProcessor;
 	}
 	@Override
 	public void clearGui() {
@@ -85,6 +76,13 @@ public class Json2VarPostProcessorGui extends AbstractPostProcessorGui{
 			jpAssertion.setVars(varsRadioButton.isSelected());
 			jpAssertion.setProps(propsRadioButton.isSelected());
 		}		
+	}
+	@Override
+	public TestElement createTestElement() {
+		// TODO Auto-generated method stub
+		Json2VarPostProcessor json2VarPostProcessor = new Json2VarPostProcessor();
+		modifyTestElement(json2VarPostProcessor);
+		return json2VarPostProcessor;
 	}
 	@Override
 	public void configure(TestElement element) {

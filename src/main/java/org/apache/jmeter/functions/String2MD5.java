@@ -23,7 +23,7 @@ public class String2MD5 extends AbstractFunction {
 	static {
 		desc.add("Convert String to MD5");
 	}
-	private  String MD5(String sourceStr)
+	public static String MD5(String sourceStr)
 	{
 		String result = "";
 		try {

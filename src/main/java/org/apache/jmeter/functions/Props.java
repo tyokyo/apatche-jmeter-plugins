@@ -3,11 +3,13 @@ package org.apache.jmeter.functions;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+
 import org.apache.jmeter.engine.util.CompoundVariable;
 import org.apache.jmeter.functions.AbstractFunction;
 import org.apache.jmeter.functions.InvalidVariableException;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.samplers.Sampler;
+import org.apache.jmeter.threads.JMeterContext;
 import org.apache.jmeter.util.JMeterUtils;
 
 public class Props extends AbstractFunction {
