@@ -31,6 +31,7 @@ public class JsonParse {
 	private String queryString;
 
     public List<Object> parse(){
+    	logger.info("QueryString="+getQueryString());
         List<Object> resultList = JsonPath.read(getJsonString(), getQueryString());
         setResult(resultList);
         return resultList;

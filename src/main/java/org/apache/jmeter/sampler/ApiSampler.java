@@ -19,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.jmeter.samplers.Entry;
 
+import sioeye.spider.helpers.PropertyHelpers;
+
 public class ApiSampler extends AbstractSampler {
 	/** 
 	 * @Fields serialVersionUID : TODO(用一句话描述这个变量表示什么) 
@@ -55,7 +57,7 @@ public class ApiSampler extends AbstractSampler {
 	public  String storeResponseVaribles(JMeterContext threadContext,String json,String keyString){
 		log.warn(json);
 		StringBuffer buffer=new StringBuffer();
-		String[] keys = keyString.split(",");
+		String[] keys = keyString.trim().split(",");
 		if (getVars()) {
 			buffer.append("\nJMeterVariables\n");
 		}else {
@@ -66,7 +68,7 @@ public class ApiSampler extends AbstractSampler {
 			try {
 				JsonParse js = new JsonParse();
 				js.setJsonString(json);
-				js.setQueryString(".value."+key);
+				js.setQueryString("."+key);
 				List<Object> skens = js.parse();
 				if (skens.size()==1) {
 					value =skens.get(0).toString();
@@ -95,13 +97,8 @@ public class ApiSampler extends AbstractSampler {
 		SampleResult res = new SampleResult();
 		res.sampleStart();
 		String url=String.format("https://%s%s", getServer(),getMethod());
-/*		Map<String, String> params = new HashMap<String, String>();
-        params.put("username","tyokyo@126.com");
-        params.put("password","25f9e794323b453885f5181f1b624d0b");
-	    params.put("type","app");
-*/	    
 	    Map<String, String> header = new HashMap<String, String>();
-	    
+	    //if vars
 		JMeterContext threadContext = getThreadContext();
 		JMeterVariables variables = threadContext.getVariables();
 		Set<java.util.Map.Entry<String, Object>> vEntries = variables.entrySet();
@@ -117,10 +114,13 @@ public class ApiSampler extends AbstractSampler {
 			// TODO: handle exception
 		}
 		
-		header.put("Content-Type", "application/json;charset=utf-8");
-		header.put("X_Sioeye_App_Id", "usYhGBBKDMiypaKFV8fc3kE4");
-		header.put("X_Sioeye_App_Sign_Key", "5f3773d461775804ca2c942f8589f1d6,1476178217671");
-		header.put("X_Sioeye_App_Production", "1");
+		HashMap<String, String> headerMap = PropertyHelpers.getHeaderMap();
+		Set<String> keys = headerMap.keySet();
+		for (String key : keys) {
+			String value = headerMap.get(key);
+			header.put(key, value);
+		}
+		//if props
 		try {
 			String X_sioeye_sessiontoken =JMeterUtils.getJMeterProperties().get("sessiontoken").toString();
 			if (X_sioeye_sessiontoken!=null) {
@@ -143,7 +143,6 @@ public class ApiSampler extends AbstractSampler {
 		res.setSampleLabel(getName());
 		//res.setResponseData("setResponseData", null);
 		res.setDataType(SampleResult.TEXT);
-		
 		
 		String varLogsString = storeResponseVaribles(getThreadContext(), new String(res.getResponseData()),getStoredVariables());
 		res.setResponseData(new String(res.getResponseData())+varLogsString,null);

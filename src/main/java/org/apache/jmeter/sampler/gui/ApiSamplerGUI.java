@@ -94,12 +94,9 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		tcm.getColumn(0).setPreferredWidth(10);
 		tcm.getColumn(1).setPreferredWidth(30);
 		headerTable.setRowHeight(20);  	
-		HashMap<String, String> map = new HashMap<String, String>();
-		map.put("Content-Type", "application/json");
-		map.put("X_Sioeye_App_Id", "usYhGBBKDMiypaKFV8fc3kE4");
-		map.put("X_Sioeye_App_Sign_Key", "5f3773d461775804ca2c942f8589f1d6,1476178217671");
-		map.put("X_Sioeye_App_Production", "1");
-		headerModel.construct(map);
+		//push header data
+		HashMap<String, String> map = PropertyHelpers.getHeaderMap();
+		HeaderTableModel.construct(map);
 		JTableHeader tableHeader = headerTable.getTableHeader();
 		tableHeader.setReorderingAllowed(false);   //设置表格列不可重排
 		DefaultTableCellRenderer hr =(DefaultTableCellRenderer)tableHeader.getDefaultRenderer();  //获得表格头的单元格对象
