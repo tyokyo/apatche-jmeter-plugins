@@ -35,7 +35,7 @@ public class ApiSampler extends AbstractSampler {
 	private static final String VARIABLES_NAMES= "ApiSampler.var.adds";
 	private static Logger log = LoggerFactory.getLogger(ApiSampler.class);
 	private static final String USER_DEFINED_VARIABLES = "ApiSampler.user_defined_variables"; //$NON-NLS-1$
-
+	private static final String USER_DEFINED_HEADERS = "ApiSampler.user_defined_headers"; //$NON-NLS-1$
 	public void setStoredVariables(String varsString){
 		setProperty(VARIABLES_NAMES, varsString);
 	}
@@ -63,6 +63,7 @@ public class ApiSampler extends AbstractSampler {
 		}else {
 			buffer.append("\nJMeterProperties\n");
 		}
+		HashMap<String, String> kvs = new HashMap<String, String>();
 		for (String key : keys) {
 			String value=null;
 			try {
@@ -72,28 +73,46 @@ public class ApiSampler extends AbstractSampler {
 				List<Object> skens = js.parse();
 				if (skens.size()==1) {
 					value =skens.get(0).toString();
+					kvs.put(key+"_count", skens.size()+"");
+					kvs.put(key, value);
+				}else {
+					kvs.put(key+"_count", skens.size()+"");
+					for (int i = 0; i <skens.size(); i++) {
+						if (i==0) {
+							value =skens.get(i).toString();
+							kvs.put(key, value);
+						}else {
+							value =skens.get(i).toString();
+							kvs.put(key+"_"+i, value);
+						}
+					}
 				}
 				js.print();
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
-			if (value!=null) {
-				if (getVars()) {
-					JMeterVariables resVariables = threadContext.getVariables();
+		}
+		if (kvs!=null) {
+			if (getVars()) {
+				JMeterVariables resVariables = threadContext.getVariables();
+				for (String key : kvs.keySet()) {
+					String value = kvs.get(key);
 					resVariables.put(key, value);
 					buffer.append(String.format("%s=%s\n", key,value));
-				}else {
+				}
+			}else {
+				for (String key : kvs.keySet()) {
+					String value = kvs.get(key);
 					JMeterUtils.getJMeterProperties().put(key, value);
 					buffer.append(String.format("%s=%s\n", key,value));
 				}
 			}
 		}
+		log.info(buffer.toString());
 		return buffer.toString();
 	}
 	@Override
 	public SampleResult sample(Entry arg0) {
-		// TODO Auto-generated method stub
-		// TODO Auto-generated method stub
 		SampleResult res = new SampleResult();
 		res.sampleStart();
 		String url=String.format("https://%s%s", getServer(),getMethod());
@@ -154,12 +173,21 @@ public class ApiSampler extends AbstractSampler {
 	public void setUserDefinedVariables(Arguments vars) {
 		setProperty(new TestElementProperty(USER_DEFINED_VARIABLES, vars));
 	}
-
 	public JMeterProperty getUserDefinedVariablesAsProperty() {
 		return getProperty(USER_DEFINED_VARIABLES);
 	}
+	public void setUserDefinedHeaders(Arguments vars) {
+		setProperty(new TestElementProperty(USER_DEFINED_HEADERS, vars));
+	}
+	public JMeterProperty getUserDefinedHeadersAsProperty() {
+		return getProperty(USER_DEFINED_HEADERS);
+	}
 	public Map<String, String> getUserDefinedVariables() {
 		Arguments args = getVariables();
+		return args.getArgumentsAsMap();
+	}
+	public Map<String, String> getUserDefinedHeaders() {
+		Arguments args = getHeaders();
 		return args.getArgumentsAsMap();
 	}
 	private Arguments getVariables() {
@@ -167,6 +195,14 @@ public class ApiSampler extends AbstractSampler {
 		if (args == null) {
 			args = new Arguments();
 			setUserDefinedVariables(args);
+		}
+		return args;
+	}
+	private Arguments getHeaders() {
+		Arguments args = (Arguments) getProperty(USER_DEFINED_HEADERS).getObjectValue();
+		if (args == null) {
+			args = new Arguments();
+			setUserDefinedHeaders(args);
 		}
 		return args;
 	}

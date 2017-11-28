@@ -2,6 +2,7 @@ package org.apache.jmeter.sampler.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +16,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -78,9 +80,18 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 	public static JRadioButton varsRadioButton;
 	public static ArgumentsPanel2 parameterArgumentsPanel;
 	public static ArgumentsPanel headerArgumentsPanel;
+	public static  JButton borwserButton;
 	public static int w;
 	public static int h;
 	public ApiSamplerGUI(){
+		descriptionTextField = new JLabeledTextField(ApiSampler.DESCRIPTION);
+		serverUrlTextField = new JLabeledTextField(ApiSampler.SERVER);
+		methodTextField = new JLabeledTextField(ApiSampler.METHOD);
+		varsTextField = new JLabeledTextField(ApiSampler.ARGS);
+		jTabbedPane = new JTabbedPane();
+		parameterArgumentsPanel=new ArgumentsPanel2(null, Color.WHITE, true, true);
+		headerArgumentsPanel=new ArgumentsPanel(null);
+		borwserButton = new JButton("browser");
 		init(); 
 	}
 	public static JTable getHeaderTable(){
@@ -109,7 +120,9 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 	}
 	public static JScrollPane getHeaderTableScrollPane(){
 		JScrollPane tableJScrollPane = new JScrollPane();
-		tableJScrollPane.setViewportView(getHeaderTable());
+		tableJScrollPane.setViewportView(new ArgumentsPanel(null));
+		//tableJScrollPane.setViewportView(getHeaderTable());
+
 		return tableJScrollPane;
 	}
 	public static  JDialog spiderDialog(){
@@ -231,30 +244,27 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		}
 	}
 	private void init() {
-		setLayout(new VerticalLayout(5, VerticalLayout.BOTH, VerticalLayout.TOP));
+		setLayout(new BorderLayout(10, 10));
 		setBorder(makeBorder());
+		add(makeTitlePanel(), BorderLayout.NORTH);
+
 		Toolkit toolkit = Toolkit.getDefaultToolkit();
 		w=(int)toolkit.getScreenSize().getWidth()-100;
 		h=(int)toolkit.getScreenSize().getHeight()-100;
 
-		add(makeTitlePanel());
 		VerticalPanel mainPanel = new VerticalPanel();
 
 		HorizontalPanel descPanel = new HorizontalPanel();
-		descriptionTextField = new JLabeledTextField(ApiSampler.DESCRIPTION);
 		descPanel.add(descriptionTextField);
 		mainPanel.add(descPanel);
 
 		HorizontalPanel serverPanel = new HorizontalPanel();
-		serverUrlTextField = new JLabeledTextField(ApiSampler.SERVER);
 		//serverUrlTextField.setText("https://api.siocloud.sioeye.cn/functions/");
 		serverPanel.add(serverUrlTextField);
 		mainPanel.add(serverPanel);
 
 		HorizontalPanel methodPanel = new HorizontalPanel();
-		methodTextField = new JLabeledTextField(ApiSampler.METHOD);
 		methodPanel.add(methodTextField);
-		final JButton borwserButton = new JButton("browser");
 		borwserButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -265,40 +275,31 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		});
 		methodPanel.add(borwserButton);
 		mainPanel.add(methodPanel);
-		
-		
+
 		VerticalPanel settingPanel = new VerticalPanel();
 		settingPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),"请求结果保存为")); 
-		
+
 		ButtonGroup buttonGroup = new ButtonGroup();
 		propsRadioButton = new JRadioButton("props");
 		varsRadioButton = new JRadioButton("vars");
 		varsRadioButton.setSelected(true);
 		buttonGroup.add(propsRadioButton);
 		buttonGroup.add(varsRadioButton);
-		
+
 		HorizontalPanel groupPanel = new HorizontalPanel();
 		groupPanel.add(propsRadioButton);
 		groupPanel.add(varsRadioButton);
 		settingPanel.add(groupPanel);
-		
+
 		HorizontalPanel varsPanel = new HorizontalPanel();
-		varsTextField = new JLabeledTextField(ApiSampler.ARGS);
 		varsPanel.add(varsTextField);
 		settingPanel.add(varsPanel);
-		
 		mainPanel.add(settingPanel);
-		add(mainPanel, BorderLayout.CENTER);
-		
-		HorizontalPanel headerPanel = new HorizontalPanel();
-		headerPanel.add(getHeaderTableScrollPane());
-		//headerPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),"Header")); 
-		jTabbedPane = new JTabbedPane();
-		jTabbedPane.add("Header",headerPanel);
-		parameterArgumentsPanel=new ArgumentsPanel2(null, Color.WHITE, true, true);
+		add(mainPanel, BorderLayout.NORTH);
+
+		jTabbedPane.add("Header",headerArgumentsPanel);
 		jTabbedPane.add("Parameter",parameterArgumentsPanel);
-		//jTabbedPane.add("Parameter",parameterPanel);
-		add(jTabbedPane, BorderLayout.SOUTH);
+		add(jTabbedPane, BorderLayout.CENTER);
 	}
 
 	@Override
@@ -318,7 +319,9 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		descriptionTextField.setText("");
 		methodTextField.setText("");
 		serverUrlTextField.setText("");
-		parameterArgumentsPanel.removeAllArgument();
+		varsTextField.setText("");
+		parameterArgumentsPanel.clear();
+		headerArgumentsPanel.clear();
 	}
 
 	@Override
@@ -336,6 +339,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 			testSmpler.setDescription(descriptionTextField.getText());
 			testSmpler.setMethod(methodTextField.getText());
 			testSmpler.setUserDefinedVariables((Arguments) parameterArgumentsPanel.createTestElement());
+			testSmpler.setUserDefinedHeaders((Arguments) headerArgumentsPanel.createTestElement());
 			testSmpler.setVars(varsRadioButton.isSelected());
 			testSmpler.setProps(propsRadioButton.isSelected());
 			testSmpler.setStoredVariables(varsTextField.getText());
@@ -361,8 +365,12 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 			propsRadioButton.setSelected(jvp.getProps());
 			varsTextField.setText(jvp.getStoredVariables());
 			JMeterProperty udv = jvp.getUserDefinedVariablesAsProperty();
+			JMeterProperty hdv = jvp.getUserDefinedHeadersAsProperty();
 			if (udv != null) {
 				parameterArgumentsPanel.configure((Arguments) udv.getObjectValue());
+			}
+			if (hdv != null) {
+				headerArgumentsPanel.configure((Arguments) hdv.getObjectValue());
 			}
 		}		
 	}
