@@ -2,7 +2,6 @@ package org.apache.jmeter.sampler.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,13 +9,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -29,9 +26,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-
 import kg.apc.jmeter.JMeterPluginsUtils;
-
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.config.gui.ArgumentsPanel;
 import org.apache.jmeter.gui.util.HorizontalPanel;
@@ -41,10 +36,8 @@ import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.testelement.property.JMeterProperty;
 import org.apache.jorphan.gui.JLabeledTextField;
-import org.apache.jorphan.gui.layout.VerticalLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import sioeye.spider.entities.ApiDetails;
 import sioeye.spider.entities.ApiParameters;
 import sioeye.spider.entities.Apis;
@@ -122,7 +115,6 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		JScrollPane tableJScrollPane = new JScrollPane();
 		tableJScrollPane.setViewportView(new ArgumentsPanel(null));
 		//tableJScrollPane.setViewportView(getHeaderTable());
-
 		return tableJScrollPane;
 	}
 	public static  JDialog spiderDialog(){
@@ -307,14 +299,12 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		// TODO Auto-generated method stub
 		return this.getClass().getSimpleName();
 	}
-
 	//设置显示名称
 	@Override
 	public String getStaticLabel() {
 		// TODO Auto-generated method stub
 		return JMeterPluginsUtils.prefixLabel("Api Sampler");
 	}
-
 	private void initFields(){
 		descriptionTextField.setText("");
 		methodTextField.setText("");
@@ -323,7 +313,6 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		parameterArgumentsPanel.clear();
 		headerArgumentsPanel.clear();
 	}
-
 	@Override
 	public void clearGui() {
 		super.clearGui();
@@ -345,7 +334,6 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 			testSmpler.setStoredVariables(varsTextField.getText());
 		}
 	}
-
 	@Override
 	public TestElement createTestElement() {
 		// TODO Auto-generated method stub

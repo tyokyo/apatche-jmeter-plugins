@@ -18,13 +18,9 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.jmeter.samplers.Entry;
-
 import sioeye.spider.helpers.PropertyHelpers;
 
 public class ApiSampler extends AbstractSampler {
-	/** 
-	 * @Fields serialVersionUID : TODO(用一句话描述这个变量表示什么) 
-	 */ 
 	private static final long serialVersionUID = 1L;
 	public final static String SERVER = "服务器名称:"; 
 	public final static String METHOD = "路径:";
@@ -150,19 +146,10 @@ public class ApiSampler extends AbstractSampler {
 		}
 		
 		ApiTool.post(res,url, header, getUserDefinedVariables());
-		
-	/*	JsonTool.hasElement(bean, "success", "false");
-		JsonTool.hasElement(bean, "code", "3007");
-		JsonTool.hasElement(bean, "code", "3008");*/
-		/*JsonTool.hasElement(bean, "success:false,code:3007");
-		JsonTool.hasElement(bean, "success:false,code:3008");
-		JsonTool.hasElement(bean, "success:false");*/
-		
 	    //resonseData=bean.getResponsehtml();
 		res.setSampleLabel(getName());
 		//res.setResponseData("setResponseData", null);
 		res.setDataType(SampleResult.TEXT);
-		
 		String varLogsString = storeResponseVaribles(getThreadContext(), new String(res.getResponseData()),getStoredVariables());
 		res.setResponseData(new String(res.getResponseData())+varLogsString,null);
 		res.setSamplerData(ApiTool.getSamplerData(url, header, getUserDefinedVariables()));
