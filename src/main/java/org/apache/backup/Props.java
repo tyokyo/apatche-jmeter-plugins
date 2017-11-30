@@ -1,4 +1,4 @@
-package org.apache.jmeter.functions;
+package org.apache.backup;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -10,6 +10,7 @@ import org.apache.jmeter.functions.InvalidVariableException;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.samplers.Sampler;
 import org.apache.jmeter.threads.JMeterContext;
+import org.apache.jmeter.threads.JMeterVariables;
 import org.apache.jmeter.util.JMeterUtils;
 
 public class Props extends AbstractFunction {
@@ -35,8 +36,13 @@ public class Props extends AbstractFunction {
     public synchronized String execute(SampleResult previousResult, Sampler currentSampler)
             throws InvalidVariableException {
     	String key = new String(((CompoundVariable) values[0]).execute().trim());
-    	String value = JMeterUtils.getJMeterProperties().getProperty(key);
-        return value;
+    	String value="";
+    	try {
+    		value = JMeterUtils.getJMeterProperties().getProperty(key);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+    	 return value==null?"":value;
     }
 
     /** {@inheritDoc} */

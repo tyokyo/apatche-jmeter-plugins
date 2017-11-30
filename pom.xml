@@ -5,9 +5,8 @@
 	<groupId>kg.apc</groupId>
 	<artifactId>ApatcheJMeter_ckt</artifactId>
 	<version>0.1</version>
-
-	<name>JSON Plugins</name>
-	<description>JSON Plugins</description>
+	<name>apatche jmeter extend plugins</name>
+	<description>Evelyn Plugins</description>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -126,14 +125,6 @@
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
 			<version>3.22.0-GA</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.json/json -->
-		<!-- <dependency> <groupId>org.json</groupId> <artifactId>json</artifactId> 
-			<version>20171018</version> </dependency> -->
-		<dependency>
-			<groupId>com.jayway.jsonpath</groupId>
-			<artifactId>json-path</artifactId>
-			<version>2.1.0</version>
 		</dependency>
 	</dependencies>
 </project>

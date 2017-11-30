@@ -51,7 +51,7 @@ public class ApiSampler extends AbstractSampler {
 		setProperty(VARSSTATUS, status);
 	}
 	public  String storeResponseVaribles(JMeterContext threadContext,String json,String keyString){
-		log.warn(json);
+		//log.warn(json);
 		StringBuffer buffer=new StringBuffer();
 		String[] keys = keyString.trim().split(",");
 		if (getVars()) {
@@ -104,7 +104,9 @@ public class ApiSampler extends AbstractSampler {
 				}
 			}
 		}
+		log.warn("============="+threadContext.getCurrentSampler().getName()+"==========");
 		log.info(buffer.toString());
+		log.warn("==================================================");
 		return buffer.toString();
 	}
 	@Override
@@ -151,8 +153,9 @@ public class ApiSampler extends AbstractSampler {
 		//res.setResponseData("setResponseData", null);
 		res.setDataType(SampleResult.TEXT);
 		String varLogsString = storeResponseVaribles(getThreadContext(), new String(res.getResponseData()),getStoredVariables());
-		res.setResponseData(new String(res.getResponseData())+varLogsString,null);
-		res.setSamplerData(ApiTool.getSamplerData(url, header, getUserDefinedVariables()));
+		//res.setResponseData(new String(res.getResponseData())+varLogsString,null);
+		res.setResponseData(new String(res.getResponseData()),null);
+		res.setSamplerData(ApiTool.getSamplerData(url, header, getUserDefinedVariables())+"\n"+varLogsString);
 		res.setResponseOK();
 		res.sampleEnd();
 		return res;

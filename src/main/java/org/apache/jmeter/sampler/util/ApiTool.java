@@ -113,7 +113,7 @@ public class ApiTool{
 		try {
 			JsonParse js = new JsonParse();
 			js.setJsonString(result);
-			js.setQueryString(".value.sessiontoken");
+			js.setQueryString(".sessiontoken");
 			List<Object> skens = js.parse();
 			if (skens.size()==1) {
 				String sessiontoken =skens.get(0).toString();
