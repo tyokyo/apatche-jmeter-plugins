@@ -22,7 +22,8 @@ import org.apache.jmeter.gui.util.VerticalPanel;
 import org.apache.jorphan.gui.JLabeledTextField;
 import org.apache.log.Logger;
 
-import elonmeter.csv.jmeter.RandomCSVDataSetConfigGui;
+import elonmeter.csv.jmeter.GridDataSetConfig;
+import elonmeter.csv.jmeter.GridDataSetConfigGui;
 
 public class EditColumnAction implements ActionListener {
 
@@ -83,8 +84,8 @@ public class EditColumnAction implements ActionListener {
 				String column=jCbox.getSelectedItem().toString();
 				String changeValue=valueField.getText();
 				grid.getColumnModel().getColumn(index).setHeaderValue(changeValue);
-				RandomCSVDataSetConfigGui.varChangedNewValue=changeValue;
-				RandomCSVDataSetConfigGui.varChangedOldValue=column;
+				GridDataSetConfigGui.varChangedNewValue=changeValue;
+				GridDataSetConfigGui.varChangedOldValue=column;
 				
 				grid.getTableHeader().firePropertyChange(column, 1, 2);
 				

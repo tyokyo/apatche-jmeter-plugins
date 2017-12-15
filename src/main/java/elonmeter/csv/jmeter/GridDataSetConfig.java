@@ -16,36 +16,27 @@ import org.apache.jorphan.logging.LoggingManager;
 import org.apache.jorphan.util.JMeterStopThreadException;
 import org.apache.jorphan.util.JOrphanUtils;
 import org.apache.log.Logger;
-
-import elonmeter.csv.RandomCSVReader;
-
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import kg.apc.jmeter.JMeterPluginsUtils;
 
-public class RandomCSVDataSetConfig extends ConfigTestElement implements NoThreadClone, LoopIterationListener, TestStateListener {
+public class GridDataSetConfig extends ConfigTestElement implements NoThreadClone, LoopIterationListener, TestStateListener {
+	private static final long serialVersionUID = 1L;
 	private static final Logger log = LoggingManager.getLoggerForClass();
 	public static final String VARIABLE_NAMES = "variableNames";
 	public static final String RANDOM_ORDER = "randomOrder";
 	public static final String REWIND_ON_THE_END = "rewindOnTheEndOfList";
 	public static final String INDEPENDENT_LIST_PER_THREAD = "independentListPerThread";
 	private int curPos = 0;
-	private final ThreadLocal<RandomCSVReader> threadLocalRandomCSVReader = new ThreadLocalSerializable<RandomCSVReader>() {
-		@Override
-		protected RandomCSVReader initialValue() {
-			return createRandomCSVReader();
-		}
-	};
 	public JMeterProperty getData() {
 		JMeterProperty brokenProp = getProperty("threads_schedule");
-		JMeterProperty usualProp = getProperty("ultimatethreadgroupdata");
+		JMeterProperty usualProp = getProperty("threadgriddataset");
 
 		if ((brokenProp instanceof CollectionProperty)) {
 			if ((usualProp == null) || ((usualProp instanceof NullProperty))) {
-				log.warn("Copying 'threads_schedule' into 'ultimatethreadgroupdata'");
+				log.warn("Copying 'threads_schedule' into 'threadgriddataset'");
 				JMeterProperty newProp = brokenProp.clone();
-				newProp.setName("ultimatethreadgroupdata");
+				newProp.setName("threadgriddataset");
 				setProperty(newProp);
 			}
 			log.warn("Removing property 'threads_schedule' as invalid");
@@ -57,7 +48,7 @@ public class RandomCSVDataSetConfig extends ConfigTestElement implements NoThrea
 			return overrideProp;
 		}
 
-		return getProperty("ultimatethreadgroupdata");
+		return getProperty("threadgriddataset");
 	}
 	private CollectionProperty getLoadFromExternalProperty()
 	{
@@ -85,7 +76,7 @@ public class RandomCSVDataSetConfig extends ConfigTestElement implements NoThrea
 			}
 
 			log.info("Setting threads profile from property threads_schedule: " + loadProp);
-			return JMeterPluginsUtils.tableModelRowsToCollectionProperty(dataModel, "ultimatethreadgroupdata");
+			return JMeterPluginsUtils.tableModelRowsToCollectionProperty(dataModel, "threadgriddataset");
 		}
 		return null;
 	}
@@ -106,46 +97,9 @@ public class RandomCSVDataSetConfig extends ConfigTestElement implements NoThrea
 			throw new RuntimeException("Unknown load type: " + parts[0]);
 		}
 	}
-	private static class ThreadLocalSerializable<T> extends ThreadLocal<T> implements Serializable {
-	}
-
-	private RandomCSVReader randomCSVReader;
-
 	@Override
 	public void iterationStart(LoopIterationEvent loopIterationEvent) {
 		readTableVariables();
-	}
-
-	private void readRandom() {
-		final RandomCSVReader reader = getReader();
-		long lineAddr;
-		synchronized (reader) {
-			if (reader.hasNextRecord()) {
-				lineAddr = reader.getNextLineAddr();
-			} else {
-				// TODO: interrupt iteration
-				randomCSVReader = null;
-				throw new JMeterStopThreadException("All records in the CSV file have been passed.");
-			}
-		}
-
-		JMeterVariables variables = JMeterContextService.getContext().getVariables();
-		putVariables(variables, getDestinationVariableKeys(), reader.readLineWithSeek(lineAddr));
-	}
-
-
-	private void readConsistent() {
-		final RandomCSVReader reader = getReader();
-		synchronized (reader) {
-			if (reader.hasNextRecord()) {
-				JMeterVariables variables = JMeterContextService.getContext().getVariables();
-				putVariables(variables, getDestinationVariableKeys(), reader.readNextLine());
-			} else {
-				// TODO: interrupt iteration
-				randomCSVReader = null;
-				throw new JMeterStopThreadException("All records in the CSV file have been passed.");
-			}
-		}
 	}
 	private void readTableVariables() {
 		JMeterProperty threadValues=getData();
@@ -158,7 +112,6 @@ public class RandomCSVDataSetConfig extends ConfigTestElement implements NoThrea
 			return;
 		}
 		try {
-			@SuppressWarnings("unchecked")
 			JMeterProperty jMeterProperty =prop.get(curPos);
 			ArrayList<String> rowObject = (ArrayList<String>) prop.get(curPos).getObjectValue();
 			int rowSize=rowObject.size();
@@ -180,9 +133,8 @@ public class RandomCSVDataSetConfig extends ConfigTestElement implements NoThrea
 
 	public String[] getDestinationVariableKeys() {
 		String vars = getVariableNames();
-		return hasVariablesNames() ?
-				JOrphanUtils.split(vars, ",") :
-					getReader().getHeader();
+		String[] varKeys= {  };
+		return hasVariablesNames() ?JOrphanUtils.split(vars, ",") :varKeys;
 	}
 
 	private void putVariables(JMeterVariables variables, String[] keys, String[] values) {
@@ -192,19 +144,6 @@ public class RandomCSVDataSetConfig extends ConfigTestElement implements NoThrea
 			log.warn("putVariables-key="+keys[i]+" value="+values[i]);
 		}
 	}
-
-	private RandomCSVReader getReader() {
-		return isIndependentListPerThread() ? threadLocalRandomCSVReader.get() : randomCSVReader;
-	}
-
-	private RandomCSVReader createRandomCSVReader() {
-		return new RandomCSVReader(
-				isRandomOrder(),
-				hasVariablesNames(),
-				isRewindOnTheEndOfList()
-				);
-	}
-
 	private boolean hasVariablesNames() {
 		String vars = getVariableNames();
 		return (vars != null && !vars.isEmpty());
@@ -217,7 +156,7 @@ public class RandomCSVDataSetConfig extends ConfigTestElement implements NoThrea
 
 	@Override
 	public void testStarted(String s) {
-		randomCSVReader = createRandomCSVReader();
+		
 	}
 
 	@Override
@@ -227,7 +166,7 @@ public class RandomCSVDataSetConfig extends ConfigTestElement implements NoThrea
 
 	@Override
 	public void testEnded(String s) {
-		randomCSVReader = null;
+		
 	}
 	public String getVariableNames() {
 		return getPropertyAsString(VARIABLE_NAMES);

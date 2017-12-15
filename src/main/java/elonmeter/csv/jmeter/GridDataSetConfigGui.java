@@ -23,8 +23,9 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class RandomCSVDataSetConfigGui extends AbstractConfigGui implements TableModelListener, CellEditorListener{
-	public static final String WIKIPAGE = "RandomCSVDataSetConfig";
+public class GridDataSetConfigGui extends AbstractConfigGui implements TableModelListener, CellEditorListener{
+	private static final long serialVersionUID = -7191034273955150216L;
+	public static final String WIKIPAGE = "GridDataSetConfig";
 	private static final Logger log = LoggingManager.getLoggerForClass();
 	private JLabeledTextField variableTextField;
 	public static  String[] columnIdentifiers = {  };
@@ -36,7 +37,7 @@ public class RandomCSVDataSetConfigGui extends AbstractConfigGui implements Tabl
 	protected ButtonPanelAddEditDelete columnButtons;
 	public static String varChangedOldValue="";
 	public static String varChangedNewValue="";
-	public RandomCSVDataSetConfigGui() {
+	public GridDataSetConfigGui() {
 		initGui();
 		initGuiValues();
 	}
@@ -110,17 +111,17 @@ public class RandomCSVDataSetConfigGui extends AbstractConfigGui implements Tabl
 	}
 	@Override
 	public String getLabelResource() {
-		return "random_csv_data_set_config";
+		return "table_data_set_config";
 	}
 
 	@Override
 	public String getStaticLabel() {
-		return "bzm2 - Random CSV Data Set Config";
+		return "Grid Data Set Config";
 	}
 
 	@Override
 	public TestElement createTestElement() {
-		RandomCSVDataSetConfig element = new RandomCSVDataSetConfig();
+		GridDataSetConfig element = new GridDataSetConfig();
 		modifyTestElement(element);
 		return element;
 	}
@@ -128,8 +129,8 @@ public class RandomCSVDataSetConfigGui extends AbstractConfigGui implements Tabl
 	@Override
 	public void modifyTestElement(TestElement element) {
 		configureTestElement(element);
-		if (element instanceof RandomCSVDataSetConfig) {
-			RandomCSVDataSetConfig randomCSV = (RandomCSVDataSetConfig) element;
+		if (element instanceof GridDataSetConfig) {
+			GridDataSetConfig randomCSV = (GridDataSetConfig) element;
 			if (varChangedOldValue.equals("")&&varChangedNewValue.equals("")) {
 				randomCSV.setVariableNames(this.variableTextField.getText());
 			}else {
@@ -141,9 +142,9 @@ public class RandomCSVDataSetConfigGui extends AbstractConfigGui implements Tabl
 			if (this.grid.isEditing()) {
 				this.grid.getCellEditor().stopCellEditing();
 			}
-			if ((element instanceof RandomCSVDataSetConfig)) {
-				RandomCSVDataSetConfig utg = (RandomCSVDataSetConfig)element;
-				CollectionProperty rows = JMeterPluginsUtils.tableModelRowsToCollectionProperty(this.tableModel, "ultimatethreadgroupdata");
+			if ((element instanceof GridDataSetConfig)) {
+				GridDataSetConfig utg = (GridDataSetConfig)element;
+				CollectionProperty rows = JMeterPluginsUtils.tableModelRowsToCollectionProperty(this.tableModel, "threadgriddataset");
 				utg.setData(rows);
 			}
 		}
@@ -151,10 +152,10 @@ public class RandomCSVDataSetConfigGui extends AbstractConfigGui implements Tabl
 	@Override
 	public void configure(TestElement element) {
 		super.configure(element);
-		if (element instanceof RandomCSVDataSetConfig) {
-			RandomCSVDataSetConfig randomCSV = (RandomCSVDataSetConfig) element;
+		if (element instanceof GridDataSetConfig) {
+			GridDataSetConfig randomCSV = (GridDataSetConfig) element;
 			variableTextField.setText(randomCSV.getVariableNames());
-			RandomCSVDataSetConfig utg = (RandomCSVDataSetConfig)element;
+			GridDataSetConfig utg = (GridDataSetConfig)element;
 
 			JMeterProperty threadValues = utg.getData();
 			if (!(threadValues instanceof NullProperty)) {
@@ -178,16 +179,6 @@ public class RandomCSVDataSetConfigGui extends AbstractConfigGui implements Tabl
 			} else {
 				log.warn("Received null property instead of collection");
 			}
-			/*filenameField.setText(randomCSV.getFilename());
-			fileEncodingField.setText(randomCSV.getFileEncoding());
-			delimiterField.setText(randomCSV.getDelimiter());
-			variableNamesField.setText(randomCSV.getVariableNames());
-
-			isRandomOrderCheckBox.setSelected(randomCSV.isRandomOrder());
-			isIgnoreFirstLineCheckBox.setSelected(randomCSV.isIgnoreFirstLine());
-			isRewindOnTheEndCheckBox.setSelected(randomCSV.isRewindOnTheEndOfList());
-			isIndependentListCheckBox.setSelected(randomCSV.isIndependentListPerThread());*/
-
 		}
 	}
 
@@ -232,8 +223,8 @@ public class RandomCSVDataSetConfigGui extends AbstractConfigGui implements Tabl
 		// TODO Auto-generated method stub
 		super.updateUI();
 		if (this.tableModel != null) {
-			RandomCSVDataSetConfig utgForPreview = new RandomCSVDataSetConfig();
-			utgForPreview.setData(JMeterPluginsUtils.tableModelRowsToCollectionPropertyEval(this.tableModel, "ultimatethreadgroupdata"));
+			GridDataSetConfig utgForPreview = new GridDataSetConfig();
+			utgForPreview.setData(JMeterPluginsUtils.tableModelRowsToCollectionPropertyEval(this.tableModel, "threadgriddataset"));
 		}
 	}
 }
