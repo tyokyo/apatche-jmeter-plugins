@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.List;
+
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -26,9 +27,12 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+
 import kg.apc.jmeter.JMeterPluginsUtils;
+
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.config.gui.ArgumentsPanel;
+import org.apache.jmeter.gui.GuiPackage;
 import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.VerticalPanel;
 import org.apache.jmeter.sampler.ApiSampler;
@@ -38,6 +42,7 @@ import org.apache.jmeter.testelement.property.JMeterProperty;
 import org.apache.jorphan.gui.JLabeledTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import sioeye.spider.entities.ApiDetails;
 import sioeye.spider.entities.ApiParameters;
 import sioeye.spider.entities.Apis;
@@ -118,7 +123,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		return tableJScrollPane;
 	}
 	public static  JDialog spiderDialog(){
-		spiderDialog = new JDialog();
+		spiderDialog = new JDialog(GuiPackage.getInstance().getMainFrame());
 		// 定义窗体的宽高
 		int windowsWedth = 500;
 		int windowsHeight = 350;
@@ -238,14 +243,14 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 	private void init() {
 		setLayout(new BorderLayout(10, 10));
 		setBorder(makeBorder());
-		add(makeTitlePanel(), BorderLayout.NORTH);
+		//add(makeTitlePanel(), BorderLayout.NORTH);
 
 		Toolkit toolkit = Toolkit.getDefaultToolkit();
 		w=(int)toolkit.getScreenSize().getWidth()-100;
 		h=(int)toolkit.getScreenSize().getHeight()-100;
 
 		VerticalPanel mainPanel = new VerticalPanel();
-
+		mainPanel.add(makeTitlePanel());
 		HorizontalPanel descPanel = new HorizontalPanel();
 		descPanel.add(descriptionTextField);
 		mainPanel.add(descPanel);

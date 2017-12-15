@@ -27,7 +27,6 @@
 			<email>jmeter-plugins@googlegroups.com</email>
 		</developer>
 	</developers>
-
 	<build>
 		<plugins>
 			<plugin>
