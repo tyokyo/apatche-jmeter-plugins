@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
+
+import kg.apc.jmeter.JMeterPluginsUtils;
 
 public class PropertyHelpers {
 	
@@ -80,5 +83,24 @@ public class PropertyHelpers {
 	public String getApiDocUrl(){
 		String apidocurl=loadConfigPro().get("apidocurl").toString();
 		return apidocurl;
+	}
+	public static String getKey(String key){
+		String value = "";
+		Properties properties = new Properties();
+		InputStream fis=null;
+		try {
+			fis = JMeterPluginsUtils.class.getResourceAsStream("properties/config.properties");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			properties.load(fis);
+			value = properties.getProperty(key);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return value;
 	}
 }

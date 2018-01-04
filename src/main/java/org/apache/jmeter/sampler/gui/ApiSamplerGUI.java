@@ -2,6 +2,7 @@ package org.apache.jmeter.sampler.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -43,11 +44,13 @@ import org.apache.jorphan.gui.JLabeledTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import elonmeter.csv.jmeter.HelpPanel;
 import sioeye.spider.entities.ApiDetails;
 import sioeye.spider.entities.ApiParameters;
 import sioeye.spider.entities.Apis;
 import sioeye.spider.entities.Scenes;
 import sioeye.spider.helpers.PropertyHelpers;
+import sioeye.spider.helpers.UrlHelper;
 import sioeye.spider.impl.DefaultApiDetailSpider;
 import sioeye.spider.impl.DefaultApiParameterSpider;
 import sioeye.spider.impl.DefaultApiSpider;
@@ -249,8 +252,11 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		w=(int)toolkit.getScreenSize().getWidth()-100;
 		h=(int)toolkit.getScreenSize().getHeight()-100;
 
+		Container topPanel = makeTitlePanel();
+		add(HelpPanel.addHelpLinkToPanel(topPanel, UrlHelper.api_sampler_sioeye), BorderLayout.NORTH);
+		
 		VerticalPanel mainPanel = new VerticalPanel();
-		mainPanel.add(makeTitlePanel());
+		mainPanel.add(topPanel);
 		HorizontalPanel descPanel = new HorizontalPanel();
 		descPanel.add(descriptionTextField);
 		mainPanel.add(descPanel);

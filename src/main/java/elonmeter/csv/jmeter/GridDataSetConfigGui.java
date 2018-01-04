@@ -13,12 +13,18 @@ import org.apache.jmeter.testelement.property.NullProperty;
 import org.apache.jorphan.gui.JLabeledTextField;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
+
+import sioeye.spider.helpers.PropertyHelpers;
+import sioeye.spider.helpers.UrlHelper;
 import elonmeter.csv.action.ButtonPanelAddCopyRemove;
+import elonmeter.csv.action.CopyLoadButtonPanel;
+
 import javax.swing.*;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -35,6 +41,7 @@ public class GridDataSetConfigGui extends AbstractConfigGui implements TableMode
 	protected JTable grid;
 	protected ButtonPanelAddCopyRemove buttons;
 	protected ButtonPanelAddEditDelete columnButtons;
+	protected CopyLoadButtonPanel copyLoadButtons;
 	public static String varChangedOldValue="";
 	public static String varChangedNewValue="";
 	public GridDataSetConfigGui() {
@@ -49,7 +56,7 @@ public class GridDataSetConfigGui extends AbstractConfigGui implements TableMode
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				// TODO Auto-generated method stub
-				System.out.println("propertyChange-Listener");
+				//System.out.println("propertyChange-Listener");
 				String header=getTableHeader();
 				variableTextField.setText(header);
 			}
@@ -64,7 +71,7 @@ public class GridDataSetConfigGui extends AbstractConfigGui implements TableMode
 		this.grid = new JTable();
 		this.grid.getDefaultEditor(String.class).addCellEditorListener(this);
 		createTableModel();
-		this.grid.setSelectionMode(0);
+		this.grid.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);  
 		this.grid.setMinimumSize(new Dimension(200, 100));
 
 		return this.grid;
@@ -79,11 +86,13 @@ public class GridDataSetConfigGui extends AbstractConfigGui implements TableMode
 		panel.add(scroll, "Center");
 
 		this.buttons = new ButtonPanelAddCopyRemove(this.grid, this.tableModel);
-
 		this.columnButtons=new ButtonPanelAddEditDelete(grid, tableModel);
+		this.copyLoadButtons=new CopyLoadButtonPanel(grid, tableModel);
+		
 		VerticalPanel btnPanel = new VerticalPanel();
 		btnPanel.add(this.buttons);
 		btnPanel.add(this.columnButtons);
+		btnPanel.add(this.copyLoadButtons);
 
 		panel.add(btnPanel, "South");
 
@@ -99,7 +108,9 @@ public class GridDataSetConfigGui extends AbstractConfigGui implements TableMode
 		varPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),"Variable Config")); 
 
 		Container topPanel = makeTitlePanel();
-		add(JMeterPluginsUtils.addHelpLinkToPanel(topPanel, WIKIPAGE), BorderLayout.NORTH);
+		//String url = PropertyHelpers.getKey("grid_data_set_config_help_url");
+		//add(JMeterPluginsUtils.addHelpLinkToPanel(topPanel, WIKIPAGE), BorderLayout.NORTH);
+		add(HelpPanel.addHelpLinkToPanel(topPanel, UrlHelper.grid_data_set_config), BorderLayout.NORTH);
 		topPanel.add(varPanel,BorderLayout.SOUTH);
 		add(topPanel, BorderLayout.NORTH);
 		add(createParamsPanel(), BorderLayout.CENTER);

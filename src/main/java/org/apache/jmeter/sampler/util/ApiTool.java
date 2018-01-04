@@ -14,22 +14,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-
 import net.sf.json.JSONObject;
-
 import org.apache.jmeter.functions.String2MD5;
 import org.apache.jmeter.samplers.SampleResult;
-import org.apache.jmeter.threads.JMeterContext;
 import org.apache.jmeter.util.JMeterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import bsh.This;
 
 public class ApiTool{
 	private static Logger logger =LoggerFactory.getLogger(ApiTool.class);
@@ -119,7 +113,7 @@ public class ApiTool{
 				String sessiontoken =skens.get(0).toString();
 				JMeterUtils.getJMeterProperties().put("sessiontoken", sessiontoken);
 			}
-			js.print();
+			//js.print();
 		} catch (Exception e) {
 			// TODO: handle exception
 		}

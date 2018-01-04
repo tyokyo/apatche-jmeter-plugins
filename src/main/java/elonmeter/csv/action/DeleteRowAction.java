@@ -22,18 +22,11 @@ public class DeleteRowAction
         this.deleteRowButton = deleteRowButton;
         this.sender=aSender;
     }
-
-    public void actionPerformed(ActionEvent e) {
-        if (grid.isEditing()) {
-            TableCellEditor cellEditor = grid.getCellEditor(grid.getEditingRow(), grid.getEditingColumn());
-            cellEditor.cancelCellEditing();
-        }
-
-        int rowSelected = grid.getSelectedRow();
-        if (rowSelected >= 0) {
+    public void deleteSelectRow(){
+    	int rowSelected=grid.getSelectedRow();
+		if (rowSelected >= 0) {
             tableModel.removeRow(rowSelected);
             tableModel.fireTableDataChanged();
-
             // Disable DELETE if there are no rows in the table to delete.
             if (tableModel.getRowCount() == 0) {
                 deleteRowButton.setEnabled(false);
@@ -41,14 +34,27 @@ public class DeleteRowAction
             // the appropriate one.
             else {
                 int rowToSelect = rowSelected;
-
                 if (rowSelected >= tableModel.getRowCount()) {
                     rowToSelect = rowSelected - 1;
                 }
-
                 grid.setRowSelectionInterval(rowToSelect, rowToSelect);
             }
             sender.updateUI();
         }
+    }
+    public void actionPerformed(ActionEvent e) {
+        if (grid.isEditing()) {
+            TableCellEditor cellEditor = grid.getCellEditor(grid.getEditingRow(), grid.getEditingColumn());
+            cellEditor.cancelCellEditing();
+        }
+
+        int[] rowsSelected = grid.getSelectedRows();
+        if (rowsSelected.length>1) {
+			for (int i = 0; i < rowsSelected.length; i++) {
+				deleteSelectRow();
+			}
+		}else {
+			deleteSelectRow();
+		}
     }
 }
