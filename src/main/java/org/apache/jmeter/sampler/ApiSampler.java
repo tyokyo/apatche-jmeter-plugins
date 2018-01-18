@@ -40,12 +40,12 @@ public class ApiSampler extends AbstractSampler {
 	private static Logger log = LoggerFactory.getLogger(ApiSampler.class);
 	private static final String USER_DEFINED_VARIABLES = "ApiSampler.user_defined_variables"; 
 	private static final String USER_DEFINED_HEADERS = "ApiSampler.user_defined_headers"; 
-    public static final DecimalFormat decimalFormatter = new DecimalFormat("#.#");
-    static {
-        decimalFormatter.setMaximumFractionDigits(340); 
-        decimalFormatter.setMinimumFractionDigits(1);
-    }
-    
+	public static final DecimalFormat decimalFormatter = new DecimalFormat("#.#");
+	static {
+		decimalFormatter.setMaximumFractionDigits(340); 
+		decimalFormatter.setMinimumFractionDigits(1);
+	}
+
 	public void setStoredVariables(String varsString){
 		setProperty(VARIABLES_NAMES, varsString);
 	}
@@ -65,59 +65,67 @@ public class ApiSampler extends AbstractSampler {
 		setProperty(VARSSTATUS, status);
 	}
 	public static String objectToString(Object subj) {
-        String str;
-        if (subj == null) {
-            str = "null";
-        } else if (subj instanceof Map) {
-            str = new JSONObject((Map<String, ?>) subj).toJSONString();
-        } else if (subj instanceof Double || subj instanceof Float) {
-            str = decimalFormatter.format(subj);
-        } else {
-            str = subj.toString();
-        }
-        return str;
-    }
+		String str;
+		if (subj == null) {
+			str = "null";
+		} else if (subj instanceof Map) {
+			str = new JSONObject((Map<String, ?>) subj).toJSONString();
+		} else if (subj instanceof Double || subj instanceof Float) {
+			str = decimalFormatter.format(subj);
+		} else {
+			str = subj.toString();
+		}
+		return str;
+	}
 	public  String storeResponseVaribles(JMeterContext threadContext,String responseData,String keyString ,String defaultValue){
 		JMeterVariables vars = threadContext.getVariables();
 		StringBuffer buffer=new StringBuffer();
 		String[] keys = keyString.trim().split(",");
-		for (String key : keys) {
-			String jsonQueryString="."+key;
-			try {
-	            Object jsonPathResult = JsonPath.read(responseData, jsonQueryString);
-	            Object[] arr = ((JSONArray) jsonPathResult).toArray();
-	            if (arr.length==0) {
-	            	throw new PathNotFoundException("Query array is empty");
-				}else if (arr.length==1) {
-					log.info("putVariables:key="+key+" value="+objectToString(arr[0]));
-					vars.put(key, objectToString(arr[0]));
-				}else {
-					vars.put(key, objectToString(jsonPathResult));
-					log.info("putVariables:key="+key+" value="+objectToString(jsonPathResult));
-					
-	                vars.put(key+ "_matchNr", objectToString(arr.length));
-	                log.info("putVariables:key="+key+ "_matchNr"+" value="+objectToString(arr.length));
-	                
-	                int k = 1;
-	                while (vars.get(key + "_" + k) != null) {
-	                    vars.remove(key + "_" + k);
-	                    k++;
-	                }
-	                for (int n = 0; n < arr.length; n++) {
-	                    vars.put(key+ "_" + (n + 1), objectToString(arr[n]));
-	                    log.info("putVariables:key="+key+ "_" + (n + 1)+" value="+objectToString(arr[n]));
-	                }
+		if (getVars()) {
+			for (String key : keys) {
+				String jsonQueryString="."+key;
+				try {
+					Object jsonPathResult = JsonPath.read(responseData, jsonQueryString);
+					Object[] arr = ((JSONArray) jsonPathResult).toArray();
+					if (arr.length==0) {
+						throw new PathNotFoundException("Query array is empty");
+					}else if (arr.length==1) {
+						log.info("putVariables:key="+key+" value="+objectToString(arr[0]));
+						vars.put(key, objectToString(arr[0]));
+					}else {
+						vars.put(key, objectToString(jsonPathResult));
+						log.info("putVariables:key="+key+" value="+objectToString(jsonPathResult));
+
+						vars.put(key+ "_matchNr", objectToString(arr.length));
+						log.info("putVariables:key="+key+ "_matchNr"+" value="+objectToString(arr.length));
+
+						int k = 1;
+						while (vars.get(key + "_" + k) != null) {
+							vars.remove(key + "_" + k);
+							k++;
+						}
+						for (int n = 0; n < arr.length; n++) {
+							vars.put(key+ "_" + (n + 1), objectToString(arr[n]));
+							log.info("putVariables:key="+key+ "_" + (n + 1)+" value="+objectToString(arr[n]));
+						}
+					}
+				} catch (Exception e) {
+					log.debug("Query failed", e);
+					vars.put(key, defaultValue);
+					vars.put(key+ "_matchNr", "0");
+					int k = 1;
+					while (vars.get(key + "_" + k) != null) {
+						vars.remove(key + "_" + k);
+						k++;
+					}
 				}
-	        } catch (Exception e) {
-	            log.debug("Query failed", e);
-	            vars.put(key, defaultValue);
-	            vars.put(key+ "_matchNr", "0");
-	            int k = 1;
-	            while (vars.get(key + "_" + k) != null) {
-	                vars.remove(key + "_" + k);
-	                k++;
-	            }
-	        }
+			}
+		}else {
+			for (String key : keys) {
+				String jsonQueryString="."+key;
+				Object jsonPathResult = JsonPath.read(responseData, jsonQueryString);
+				JMeterUtils.getJMeterProperties().put(key, objectToString(jsonPathResult));
+			}
 		}
 		return buffer.toString();
 	}
@@ -138,14 +146,14 @@ public class ApiSampler extends AbstractSampler {
 				js.setJsonString(json);
 				js.setQueryString("."+key);
 				List<Object> skens = js.parse();
-				
+
 				if (skens.size()==1) {
 					value =skens.get(0).toString();
 					kvs.put(key+"_matchNr", skens.size()+"");
 					kvs.put(key, value);
 				}else {
 					kvs.put(key+"_matchNr", skens.size()+"");
-					
+
 					for (int i = 0; i <skens.size(); i++) {
 						if (i==0) {
 							value =skens.get(i).toString();
@@ -185,8 +193,8 @@ public class ApiSampler extends AbstractSampler {
 		SampleResult res = new SampleResult();
 		res.sampleStart();
 		String url=String.format("https://%s%s", getServer(),getMethod());
-	    Map<String, String> header = new HashMap<String, String>();
-	    //if vars
+		Map<String, String> header = new HashMap<String, String>();
+		//if vars
 		JMeterContext threadContext = getThreadContext();
 		JMeterVariables variables = threadContext.getVariables();
 		Set<java.util.Map.Entry<String, Object>> vEntries = variables.entrySet();
@@ -201,7 +209,7 @@ public class ApiSampler extends AbstractSampler {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		
+
 		HashMap<String, String> headerMap = PropertyHelpers.getHeaderMap();
 		Set<String> keys = headerMap.keySet();
 		for (String key : keys) {
@@ -217,9 +225,9 @@ public class ApiSampler extends AbstractSampler {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		
+
 		ApiTool.post(res,url, header, getUserDefinedVariables());
-	    //resonseData=bean.getResponsehtml();
+		//resonseData=bean.getResponsehtml();
 		res.setSampleLabel(getName());
 		//res.setResponseData("setResponseData", null);
 		res.setDataType(SampleResult.TEXT);

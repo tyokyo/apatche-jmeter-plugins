@@ -58,13 +58,17 @@ public class PropertyHelpers {
 	}
 	public  static HashMap<String, String> getHeaderMap(){
 		HashMap<String, String> map = new HashMap<String, String>();
-		Properties p = loadHeaderPro();
-        Enumeration<?> enum1 = p.propertyNames();
-        while(enum1.hasMoreElements()) {
-            String strKey = (String) enum1.nextElement();
-            String strValue = p.getProperty(strKey);
-            map.put(strKey, strValue);
-        }
+		try {
+			Properties p = loadHeaderPro();
+	        Enumeration<?> enum1 = p.propertyNames();
+	        while(enum1.hasMoreElements()) {
+	            String strKey = (String) enum1.nextElement();
+	            String strValue = p.getProperty(strKey);
+	            map.put(strKey, strValue);
+	        }
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
         return map;
 	}
 	/**
