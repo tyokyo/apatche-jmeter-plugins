@@ -116,9 +116,13 @@ public class EditColumnAction implements ActionListener {
 		editColumnDialog();
 
 		// Highlight (select) the appropriate row.
-		int rowToSelect = tableModel.getRowCount() - 1;
-		if (rowToSelect < grid.getRowCount()) {
-			grid.setRowSelectionInterval(rowToSelect, rowToSelect);
+		if (tableModel.getRowCount()==0) {
+			
+		}else {
+			int rowToSelect = tableModel.getRowCount() - 1;
+			if (rowToSelect < grid.getRowCount()) {
+				grid.setRowSelectionInterval(rowToSelect, rowToSelect);
+			}
 		}
 		sender.updateUI();
 	}

@@ -1,5 +1,7 @@
 package org.apache.jmeter.sampler;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +12,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import org.apache.jmeter.config.Arguments;
+import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
 import org.apache.jmeter.sampler.util.ApiTool;
 import org.apache.jmeter.sampler.util.JsonParse;
 import org.apache.jmeter.samplers.AbstractSampler;
@@ -34,6 +37,7 @@ public class ApiSampler extends AbstractSampler {
 	public final static String METHOD = "路径:";
 	public final static String ARGS = "参数列表(逗号分隔):";
 	public final static String DESCRIPTION = "描述";
+	private static final String VAR_SESSIONTOKEN= "ApiSampler.var.sessiontoken";
 	private static final String PROPSTATUS= "ApiSampler.prop.status";
 	private static final String VARSSTATUS = "ApiSampler,var.status";
 	private static final String VARIABLES_NAMES= "ApiSampler.var.adds";
@@ -64,6 +68,12 @@ public class ApiSampler extends AbstractSampler {
 	public void setVars(Boolean status) {
 		setProperty(VARSSTATUS, status);
 	}
+	public boolean  getSessionToken() {
+		return getPropertyAsBoolean(VAR_SESSIONTOKEN);
+	}
+	public void setSessionToken(Boolean status) {
+		setProperty(VAR_SESSIONTOKEN, status);
+	}
 	public static String objectToString(Object subj) {
 		String str;
 		if (subj == null) {
@@ -88,7 +98,7 @@ public class ApiSampler extends AbstractSampler {
 					Object jsonPathResult = JsonPath.read(responseData, jsonQueryString);
 					Object[] arr = ((JSONArray) jsonPathResult).toArray();
 					if (arr.length==0) {
-						throw new PathNotFoundException("Query array is empty");
+						log.info(key+":Query array is empty");
 					}else if (arr.length==1) {
 						log.info("putVariables:key="+key+" value="+objectToString(arr[0]));
 						vars.put(key, objectToString(arr[0]));
@@ -127,6 +137,17 @@ public class ApiSampler extends AbstractSampler {
 				JMeterUtils.getJMeterProperties().put(key, objectToString(jsonPathResult));
 			}
 		}
+		//do sessiontoken 
+		String sessiontokenKey=".sessiontoken";
+		Object sessionKeyResult = JsonPath.read(responseData, sessiontokenKey);
+		Object[] arr = ((JSONArray) sessionKeyResult).toArray();
+		if (arr.length==0) {
+			log.info(sessiontokenKey+":Query array is empty");
+		}else if (arr.length==1) {
+			String value = objectToString(arr[0]);
+			log.info("jsonQueryString="+sessiontokenKey+" value="+value);
+			getThreadContext().getVariables().put("sessiontoken",value );
+		}
 		return buffer.toString();
 	}
 	public  String storeResponseVaribles(JMeterContext threadContext,String json,String keyString){
@@ -153,7 +174,6 @@ public class ApiSampler extends AbstractSampler {
 					kvs.put(key, value);
 				}else {
 					kvs.put(key+"_matchNr", skens.size()+"");
-
 					for (int i = 0; i <skens.size(); i++) {
 						if (i==0) {
 							value =skens.get(i).toString();
@@ -190,10 +210,10 @@ public class ApiSampler extends AbstractSampler {
 	}
 	@Override
 	public SampleResult sample(Entry arg0) {
-		SampleResult res = new SampleResult();
+		HTTPSampleResult res = new HTTPSampleResult();
 		res.sampleStart();
 		String url=String.format("https://%s%s", getServer(),getMethod());
-		Map<String, String> header = new HashMap<String, String>();
+		/*Map<String, String> header = new HashMap<String, String>();
 		//if vars
 		JMeterContext threadContext = getThreadContext();
 		JMeterVariables variables = threadContext.getVariables();
@@ -204,6 +224,10 @@ public class ApiSampler extends AbstractSampler {
 				String value = entry.getValue().toString();
 				if ("sessiontoken".equals(key)) {
 					header.put("X_sioeye_sessiontoken", value);
+				}
+				if (getSession()) {
+					getThreadContext().getVariables().remove("sessiontoken");
+					header.remove("X_sioeye_sessiontoken");
 				}
 			}
 		} catch (Exception e) {
@@ -224,9 +248,38 @@ public class ApiSampler extends AbstractSampler {
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
-		}
+		}*/
+		Map<String, String> headers=getUserDefinedHeaders();
 
-		ApiTool.post(res,url, header, getUserDefinedVariables());
+		if (getSessionToken()) {
+			JMeterContext threadContext = getThreadContext();
+			JMeterVariables variables = threadContext.getVariables();
+			Set<java.util.Map.Entry<String, Object>> vEntries = variables.entrySet();
+			try {
+				for (java.util.Map.Entry<String, Object> entry : vEntries) {
+					String key = entry.getKey().toString();
+					String value = entry.getValue().toString();
+					if ("sessiontoken".equals(key)) {
+						headers.put("X_sioeye_sessiontoken", value);
+						break;
+					}
+				}
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
+		res.setRequestHeaders(ApiTool.getHeaderStrings(headers));
+		try {
+			res.setURL(new URL(url));
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//ApiTool.post(res,url, getUserDefinedHeaders(), getUserDefinedVariables());
+		Map<String, String> paramsMap=getUserDefinedVariables();
+		res.setQueryString(ApiTool.queryString(paramsMap).replace("{", "{\n").replace("}", "}\n").replace(",", ",\n"));
+		ApiTool.post(res,url, headers, paramsMap);
+		
 		//resonseData=bean.getResponsehtml();
 		res.setSampleLabel(getName());
 		//res.setResponseData("setResponseData", null);
@@ -235,7 +288,8 @@ public class ApiSampler extends AbstractSampler {
 		String varLogsString = storeResponseVaribles(getThreadContext(), new String(res.getResponseData()),getStoredVariables(),"");
 		//res.setResponseData(new String(res.getResponseData())+varLogsString,null);
 		res.setResponseData(new String(res.getResponseData()),null);
-		res.setSamplerData(ApiTool.getSamplerData(url, header, getUserDefinedVariables())+"\n"+varLogsString);
+
+		res.setSamplerData(ApiTool.getSamplerData(url, headers, getUserDefinedVariables())+"\n"+varLogsString);
 		res.setResponseOK();
 		res.sampleEnd();
 		return res;

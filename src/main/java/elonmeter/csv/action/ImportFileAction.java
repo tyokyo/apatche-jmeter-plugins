@@ -6,7 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -83,8 +85,8 @@ public class ImportFileAction implements ActionListener {
 				File f = new File(fileField.getText());
 				if (f.exists()) {
 					try {
-						FileReader fr =  new FileReader (fileField.getText());
-						BufferedReader br = new BufferedReader (fr);
+						InputStreamReader read = new InputStreamReader(new FileInputStream(f),"utf-8");       
+						BufferedReader br=new BufferedReader(read);     
 						String line;
 						while ((line = br.readLine() )!=null) {
 							log.info(line);
@@ -94,7 +96,8 @@ public class ImportFileAction implements ActionListener {
 								tableModel.fireTableDataChanged();
 							}
 						}
-						fr.close();
+						br.close();
+						
 						if (grid.getRowCount() > rowCount) {
 							// Highlight (select) and scroll to the appropriate rows.
 							int rowToSelect = tableModel.getRowCount() - 1;
@@ -108,7 +111,7 @@ public class ImportFileAction implements ActionListener {
 						importFromFileDialog.dispose();
 					}
 				}else{
-					
+
 				}
 			}
 		});

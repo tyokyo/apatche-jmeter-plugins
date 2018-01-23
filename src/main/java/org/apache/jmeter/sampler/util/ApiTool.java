@@ -92,6 +92,26 @@ public class ApiTool{
 		}
 		return buffer.toString();
 	}
+	public static String getHeaderStrings(Map<String, String> header){
+		StringBuffer headerBuffer=new StringBuffer();
+		for (String key : header.keySet()) {
+			String value = header.get(key);
+			String lineHeader=String.format("%s:%s", key,value);
+			headerBuffer.append(lineHeader+"\n");
+		}
+		return headerBuffer.toString();
+	}
+	public static String queryString(Map<String, String> paramsMap){
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("{");
+		for (String key : paramsMap.keySet()) {
+			String value = paramsMap.get(key);
+			String line = String.format("%s:%s", key,value);
+			buffer.append(line+"\n");
+		}
+		buffer.append("}");
+		return buffer.toString();
+	}
 	public static void errorResult(Throwable e, SampleResult res)
 	  {
 	    res.setSampleLabel(res.getSampleLabel());
@@ -139,7 +159,7 @@ public class ApiTool{
 			httpsURLConnection.setDoInput(true);                  
 			httpsURLConnection.setDoOutput(true);                 
 			httpsURLConnection.setRequestMethod("POST");   
-			httpsURLConnection.setUseCaches(false);               
+			httpsURLConnection.setUseCaches(false);         
 			//SSLContext
 			TrustManager[] tm = { new MyX509TrustManager() };
 			SSLContext sslContext;
@@ -163,7 +183,6 @@ public class ApiTool{
 			httpConnectionCode = httpsURLConnection.getResponseCode(); 
 			//设置是否连接成功
 			//bean.setHttpConnectionCode(HttpsURLConnection.HTTP_OK);
-			
 			Etime=new Date().getTime();
 			String encode=httpsURLConnection.getContentEncoding();
 			if(httpConnectionCode == HttpsURLConnection.HTTP_OK) {

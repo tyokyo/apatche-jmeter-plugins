@@ -14,6 +14,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
@@ -65,12 +66,12 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		// TODO Auto-generated method stub
 		super.configureTestElement(mc);
 	}
-
+	
 	private static final Logger log = LoggerFactory.getLogger(ApiSamplerGUI.class);
 	private static final long serialVersionUID = 1L;
+	private static JRadioButton sessionTokenRadioButton;
 	private static JLabeledTextField varsTextField;
 	private static JLabeledTextField methodTextField;
-	private static JLabeledTextField descriptionTextField;
 	private static JLabeledTextField serverUrlTextField;
 	private static HeaderTableModel headerModel;
 	private static JTabbedPane jTabbedPane;
@@ -85,7 +86,6 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 	public static int w;
 	public static int h;
 	public ApiSamplerGUI(){
-		descriptionTextField = new JLabeledTextField(ApiSampler.DESCRIPTION);
 		serverUrlTextField = new JLabeledTextField(ApiSampler.SERVER);
 		methodTextField = new JLabeledTextField(ApiSampler.METHOD);
 		varsTextField = new JLabeledTextField(ApiSampler.ARGS);
@@ -204,7 +204,6 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 								for(ApiDetails detail : details){
 									log.info(detail.toString());
 									String desc = detail.getApiDesc();
-									descriptionTextField.setText(desc);
 									methodTextField.setText("/functions/"+method);
 									serverUrlTextField.setText(new PropertyHelpers().getServerUrl());
 									spiderDialog.dispose();
@@ -257,15 +256,12 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		
 		VerticalPanel mainPanel = new VerticalPanel();
 		mainPanel.add(topPanel);
-		HorizontalPanel descPanel = new HorizontalPanel();
-		descPanel.add(descriptionTextField);
-		mainPanel.add(descPanel);
 
 		HorizontalPanel serverPanel = new HorizontalPanel();
 		//serverUrlTextField.setText("https://api.siocloud.sioeye.cn/functions/");
 		serverPanel.add(serverUrlTextField);
 		mainPanel.add(serverPanel);
-
+		
 		HorizontalPanel methodPanel = new HorizontalPanel();
 		methodPanel.add(methodTextField);
 		borwserButton.addActionListener(new ActionListener() {
@@ -278,6 +274,12 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		});
 		methodPanel.add(borwserButton);
 		mainPanel.add(methodPanel);
+		
+		HorizontalPanel sessionPanel = new HorizontalPanel();
+		sessionPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),"自动添加header")); 
+		sessionTokenRadioButton=new JRadioButton("sessiontoken");
+		sessionPanel.add(sessionTokenRadioButton);
+		mainPanel.add(sessionPanel);
 
 		VerticalPanel settingPanel = new VerticalPanel();
 		settingPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),"请求结果保存为")); 
@@ -288,7 +290,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		varsRadioButton.setSelected(true);
 		buttonGroup.add(propsRadioButton);
 		buttonGroup.add(varsRadioButton);
-
+		
 		HorizontalPanel groupPanel = new HorizontalPanel();
 		groupPanel.add(propsRadioButton);
 		groupPanel.add(varsRadioButton);
@@ -317,7 +319,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		return JMeterPluginsUtils.prefixLabel("Api Sampler");
 	}
 	private void initFields(){
-		descriptionTextField.setText("");
+		sessionTokenRadioButton.setSelected(false);
 		methodTextField.setText("");
 		serverUrlTextField.setText("");
 		varsTextField.setText("");
@@ -335,8 +337,8 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		super.configureTestElement(sampler);
 		if (sampler instanceof ApiSampler) {
 			ApiSampler testSmpler = (ApiSampler) sampler;
+			testSmpler.setSessionToken(sessionTokenRadioButton.isSelected());
 			testSmpler.setServer(serverUrlTextField.getText());
-			testSmpler.setDescription(descriptionTextField.getText());
 			testSmpler.setMethod(methodTextField.getText());
 			testSmpler.setUserDefinedVariables((Arguments) parameterArgumentsPanel.createTestElement());
 			testSmpler.setUserDefinedHeaders((Arguments) headerArgumentsPanel.createTestElement());
@@ -357,8 +359,8 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		super.configure(element);
 		if(element instanceof ApiSampler){
 			ApiSampler jvp = (ApiSampler) element;
+			sessionTokenRadioButton.setSelected(jvp.getSessionToken());
 			serverUrlTextField.setText(jvp.getServer());
-			descriptionTextField.setText(jvp.getDescription());
 			methodTextField.setText(jvp.getMethod());
 			varsRadioButton.setSelected(jvp.getVars());
 			propsRadioButton.setSelected(jvp.getProps());

@@ -41,11 +41,7 @@ public class CopyLoadButtonPanel extends JPanel{
 					TableCellEditor cellEditor = table.getCellEditor(table.getEditingRow(), table.getEditingColumn());
 					cellEditor.cancelCellEditing();
 				}
-				String action = e.getActionCommand();
-				System.out.println(action);
-				if (action.equals(ADD_FROM_CLIPBOARD)) {
-					addFromClipboard();
-				}
+				addFromClipboard();
 			}
 		});
 		addFromClipboardButton.setEnabled(true);

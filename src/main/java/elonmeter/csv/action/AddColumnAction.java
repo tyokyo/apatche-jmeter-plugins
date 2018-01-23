@@ -2,13 +2,17 @@ package elonmeter.csv.action;
 
 import java.awt.BorderLayout;
 import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
+
 import org.apache.jmeter.gui.GuiPackage;
 import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.PowerTableModel;
@@ -59,12 +63,16 @@ public class AddColumnAction
 			            cellEditor.stopCellEditing();
 			        }
 			        String columnName=varNameField.getText();
-			        tableModel.addNewColumn(columnName,String.class);
-			        tableModel.fireTableDataChanged();
-			        grid.updateUI();
-			        addColumnButton.setEnabled(true);
-			        sender.updateUI();
-			        addColumnDialog.dispose();
+			        if (hasColumn(tableModel, columnName)) {
+			        	JOptionPane.showMessageDialog(GuiPackage.getInstance().getMainFrame(), "Column Name 已经存在", "error", JOptionPane.ERROR_MESSAGE);
+					}else {
+						tableModel.addNewColumn(columnName,String.class);
+				        tableModel.fireTableDataChanged();
+				        grid.updateUI();
+				        addColumnButton.setEnabled(true);
+				        sender.updateUI();
+				        addColumnDialog.dispose();
+					}
 			}
 		});
 		
@@ -76,6 +84,18 @@ public class AddColumnAction
 		addColumnDialog.setResizable(true);
 		addColumnDialog.setVisible(true);
 		return addColumnDialog;
+	}
+	public static boolean hasColumn(PowerTableModel tableModel,String columnAdded){
+		boolean has = false;
+		int columnCount = tableModel.getColumnCount();
+		for (int i = 0; i < columnCount; i++) {
+			String columnName = tableModel.getColumnName(i);
+			if (columnAdded.equals(columnName)){
+				has=true;
+			break;
+			}
+		}
+		return has;
 	}
     public void actionPerformed(ActionEvent e) {
     	 if (grid.isEditing()) {

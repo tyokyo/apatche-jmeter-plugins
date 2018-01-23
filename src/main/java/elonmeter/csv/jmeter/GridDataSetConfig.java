@@ -9,6 +9,7 @@ import org.apache.jmeter.testelement.TestStateListener;
 import org.apache.jmeter.testelement.property.CollectionProperty;
 import org.apache.jmeter.testelement.property.JMeterProperty;
 import org.apache.jmeter.testelement.property.NullProperty;
+import org.apache.jmeter.testelement.property.StringProperty;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.apache.jmeter.util.JMeterUtils;
@@ -16,6 +17,7 @@ import org.apache.jorphan.logging.LoggingManager;
 import org.apache.jorphan.util.JMeterStopThreadException;
 import org.apache.jorphan.util.JOrphanUtils;
 import org.apache.log.Logger;
+
 import java.util.ArrayList;
 
 import kg.apc.jmeter.JMeterPluginsUtils;
@@ -109,16 +111,19 @@ public class GridDataSetConfig extends ConfigTestElement implements NoThreadClon
 			return;
 		}
 		if (curPos==rowC) {
-			return;
+			curPos=0;
+			//return;
 		}
 		try {
 			JMeterProperty jMeterProperty =prop.get(curPos);
-			ArrayList<String> rowObject = (ArrayList<String>) prop.get(curPos).getObjectValue();
+			@SuppressWarnings("unchecked")
+			ArrayList<JMeterProperty> rowObject = (ArrayList<JMeterProperty>) prop.get(curPos).getObjectValue();
 			int rowSize=rowObject.size();
-			log.info(rowSize+"-"+rowObject.toString());
-			String data=rowObject.toString().replace("[", "");
-			data=data.replace("]", "");
-			String[] values=data.split(",");
+			String[] values=new String[rowSize];
+			for (int i = 0; i < rowSize; i++) {
+				values[i]=rowObject.get(i).getStringValue();
+				log.info(i+"-"+rowObject.get(i).getStringValue());
+			}
 			JMeterVariables variables = JMeterContextService.getContext().getVariables();
 			putVariables(variables, getDestinationVariableKeys(), values);
 			
