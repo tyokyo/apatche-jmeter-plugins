@@ -209,46 +209,11 @@ public class ApiSampler extends AbstractSampler {
 		return buffer.toString();
 	}
 	@Override
-	public SampleResult sample(Entry arg0) {
+	public HTTPSampleResult sample(Entry arg0) {
 		HTTPSampleResult res = new HTTPSampleResult();
 		res.sampleStart();
 		String url=String.format("https://%s%s", getServer(),getMethod());
-		/*Map<String, String> header = new HashMap<String, String>();
-		//if vars
-		JMeterContext threadContext = getThreadContext();
-		JMeterVariables variables = threadContext.getVariables();
-		Set<java.util.Map.Entry<String, Object>> vEntries = variables.entrySet();
-		try {
-			for (java.util.Map.Entry<String, Object> entry : vEntries) {
-				String key = entry.getKey().toString();
-				String value = entry.getValue().toString();
-				if ("sessiontoken".equals(key)) {
-					header.put("X_sioeye_sessiontoken", value);
-				}
-				if (getSession()) {
-					getThreadContext().getVariables().remove("sessiontoken");
-					header.remove("X_sioeye_sessiontoken");
-				}
-			}
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-
-		HashMap<String, String> headerMap = PropertyHelpers.getHeaderMap();
-		Set<String> keys = headerMap.keySet();
-		for (String key : keys) {
-			String value = headerMap.get(key);
-			header.put(key, value);
-		}
-		//if props
-		try {
-			String X_sioeye_sessiontoken =JMeterUtils.getJMeterProperties().get("sessiontoken").toString();
-			if (X_sioeye_sessiontoken!=null) {
-				header.put("X_sioeye_sessiontoken", X_sioeye_sessiontoken);
-			}
-		} catch (Exception e) {
-			// TODO: handle exception
-		}*/
+		res.setHTTPMethod("POST");
 		Map<String, String> headers=getUserDefinedHeaders();
 
 		if (getSessionToken()) {
@@ -268,7 +233,6 @@ public class ApiSampler extends AbstractSampler {
 				// TODO: handle exception
 			}
 		}
-		res.setRequestHeaders(ApiTool.getHeaderStrings(headers));
 		try {
 			res.setURL(new URL(url));
 		} catch (MalformedURLException e) {
@@ -286,13 +250,31 @@ public class ApiSampler extends AbstractSampler {
 		res.setDataType(SampleResult.TEXT);
 		//String varLogsString = storeResponseVaribles(getThreadContext(), new String(res.getResponseData()),getStoredVariables());
 		String varLogsString = storeResponseVaribles(getThreadContext(), new String(res.getResponseData()),getStoredVariables(),"");
+		log.info(varLogsString);
 		//res.setResponseData(new String(res.getResponseData())+varLogsString,null);
 		res.setResponseData(new String(res.getResponseData()),null);
-
-		res.setSamplerData(ApiTool.getSamplerData(url, headers, getUserDefinedVariables())+"\n"+varLogsString);
+		res.setRequestHeaders(ApiTool.getHeaderStrings(headers)+"\n[Thread Group Variables] \n"+getVariables(getThreadContext()));
+		//res.setSamplerData(ApiTool.getSamplerData(url, headers, getUserDefinedVariables())+"\n"+varLogsString+"");
 		res.setResponseOK();
+		
 		res.sampleEnd();
 		return res;
+	}
+	public static String getVariables(JMeterContext threadContext){
+		JMeterVariables variables = threadContext.getVariables();
+		StringBuffer varBuffer=new StringBuffer();
+		Set<java.util.Map.Entry<String, Object>> vEntries = variables.entrySet();
+		try {
+			for (java.util.Map.Entry<String, Object> entry : vEntries) {
+				String key = entry.getKey().toString();
+				String value = entry.getValue().toString();
+				String line = String.format("%s:%s", key,value);
+				varBuffer.append(line+"\n");
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return varBuffer.toString();
 	}
 	public void setUserDefinedVariables(Arguments vars) {
 		setProperty(new TestElementProperty(USER_DEFINED_VARIABLES, vars));

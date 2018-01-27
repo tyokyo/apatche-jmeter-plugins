@@ -14,12 +14,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+
 import net.sf.json.JSONObject;
+
 import org.apache.jmeter.functions.String2MD5;
+import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.util.JMeterUtils;
 import org.slf4j.Logger;
@@ -84,12 +88,6 @@ public class ApiTool{
 			buffer.append(String.format("%s : %s\n", pamKey,pamValue));
 		}
 		buffer.append("}\n");
-		buffer.append("\n\n");
-		buffer.append("Request Headers:"+"\n");
-		for (String headerKey : header.keySet()) {
-			String headerValue=header.get(headerKey);
-			buffer.append(String.format("%s : %s\n", headerKey,headerValue));
-		}
 		return buffer.toString();
 	}
 	public static String getHeaderStrings(Map<String, String> header){
@@ -138,7 +136,7 @@ public class ApiTool{
 			// TODO: handle exception
 		}
 	}
-	public static void post(SampleResult res,String api,Map<String, String> header,Map<String, String> paramsMap) {
+	public static void post(HTTPSampleResult res,String api,Map<String, String> header,Map<String, String> paramsMap) {
 		String result=null;
 		InputStream inptStream=null;
 		InputStream errorStream=null;
