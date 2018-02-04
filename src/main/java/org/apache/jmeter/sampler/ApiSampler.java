@@ -93,6 +93,21 @@ public class ApiSampler extends AbstractSampler {
 		String[] keys = keyString.trim().split(",");
 		if (getVars()) {
 			for (String key : keys) {
+				String keyStore="";
+				// TODO Auto-generated method stub
+				if (key.contains("=")) {
+					String[] kkey = key.split("=");
+					if (kkey.length==2) {
+						if (!"".equals(kkey[0])) {
+							key=kkey[0];
+							keyStore=kkey[1];
+						}
+					}else {
+						key="";
+					}
+				}else {
+					keyStore=key;
+				}
 				String jsonQueryString="."+key;
 				try {
 					Object jsonPathResult = JsonPath.read(responseData, jsonQueryString);
@@ -100,32 +115,32 @@ public class ApiSampler extends AbstractSampler {
 					if (arr.length==0) {
 						log.info(key+":Query array is empty");
 					}else if (arr.length==1) {
-						log.info("putVariables:key="+key+" value="+objectToString(arr[0]));
-						vars.put(key, objectToString(arr[0]));
+						log.info("putVariables:key="+keyStore+" value="+objectToString(arr[0]));
+						vars.put(keyStore, objectToString(arr[0]));
 					}else {
-						vars.put(key, objectToString(jsonPathResult));
-						log.info("putVariables:key="+key+" value="+objectToString(jsonPathResult));
+						vars.put(keyStore, objectToString(jsonPathResult));
+						log.info("putVariables:key="+keyStore+" value="+objectToString(jsonPathResult));
 
-						vars.put(key+ "_matchNr", objectToString(arr.length));
-						log.info("putVariables:key="+key+ "_matchNr"+" value="+objectToString(arr.length));
+						vars.put(keyStore+ "_matchNr", objectToString(arr.length));
+						log.info("putVariables:key="+keyStore+ "_matchNr"+" value="+objectToString(arr.length));
 
 						int k = 1;
-						while (vars.get(key + "_" + k) != null) {
-							vars.remove(key + "_" + k);
+						while (vars.get(keyStore + "_" + k) != null) {
+							vars.remove(keyStore + "_" + k);
 							k++;
 						}
 						for (int n = 0; n < arr.length; n++) {
-							vars.put(key+ "_" + (n + 1), objectToString(arr[n]));
-							log.info("putVariables:key="+key+ "_" + (n + 1)+" value="+objectToString(arr[n]));
+							vars.put(keyStore+ "_" + (n + 1), objectToString(arr[n]));
+							log.info("putVariables:key="+keyStore+ "_" + (n + 1)+" value="+objectToString(arr[n]));
 						}
 					}
 				} catch (Exception e) {
 					log.debug("Query failed", e);
-					vars.put(key, defaultValue);
-					vars.put(key+ "_matchNr", "0");
+					vars.put(keyStore, defaultValue);
+					vars.put(keyStore+ "_matchNr", "0");
 					int k = 1;
-					while (vars.get(key + "_" + k) != null) {
-						vars.remove(key + "_" + k);
+					while (vars.get(keyStore + "_" + k) != null) {
+						vars.remove(keyStore + "_" + k);
 						k++;
 					}
 				}
