@@ -227,7 +227,12 @@ public class ApiSampler extends AbstractSampler {
 	public HTTPSampleResult sample(Entry arg0) {
 		HTTPSampleResult res = new HTTPSampleResult();
 		res.sampleStart();
-		String url=String.format("https://%s%s", getServer(),getMethod());
+		String url="";
+		if (getMethod().startsWith("/")) {
+			url=String.format("https://%s%s", getServer(),getMethod());
+		}else {
+			url=String.format("https://%s/%s", getServer(),getMethod());
+		}
 		res.setHTTPMethod("POST");
 		Map<String, String> headers=getUserDefinedHeaders();
 
