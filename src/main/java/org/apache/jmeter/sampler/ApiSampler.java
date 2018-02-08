@@ -269,8 +269,12 @@ public class ApiSampler extends AbstractSampler {
 		//res.setResponseData("setResponseData", null);
 		res.setDataType(SampleResult.TEXT);
 		//String varLogsString = storeResponseVaribles(getThreadContext(), new String(res.getResponseData()),getStoredVariables());
-		String varLogsString = storeResponseVaribles(getThreadContext(), new String(res.getResponseData()),getStoredVariables(),"");
-		log.info(varLogsString);
+		try {
+			String varLogsString = storeResponseVaribles(getThreadContext(), new String(res.getResponseData()),getStoredVariables(),"");
+			log.info(varLogsString);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 		//res.setResponseData(new String(res.getResponseData())+varLogsString,null);
 		res.setResponseData(new String(res.getResponseData()),null);
 		res.setRequestHeaders(ApiTool.getHeaderStrings(headers)+"\n[Thread Group Variables] \n"+getVariables(getThreadContext()));

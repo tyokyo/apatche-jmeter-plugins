@@ -8,9 +8,9 @@ import org.apache.jmeter.samplers.Entry;
 
 public class FFmpegSampler extends AbstractSampler {
 	private static final long serialVersionUID = 1L;
-	public final static String ffpmeg = "ffmpeg.location"; 
-	public final static String video_path = "video.location";
-	public final static String pushurl = "video.push.url";
+	public final static String ffpmeg = "FFmpegSampler.ffmpeg.location"; 
+	public final static String video_path = "FFmpegSampler.video.location";
+	public final static String pushurl = "FFmpegSampler.video.push.url";
 	private static Logger log = LoggerFactory.getLogger(FFmpegSampler.class);
 	
 	public String  getffpmeg() {

@@ -111,16 +111,16 @@ public class ApiTool{
 		return buffer.toString();
 	}
 	public static void errorResult(Throwable e, SampleResult res)
-	  {
-	    res.setSampleLabel(res.getSampleLabel());
-	    res.setDataType("text");
-	    java.io.ByteArrayOutputStream text = new java.io.ByteArrayOutputStream(200);
-	    e.printStackTrace(new PrintStream(text));
-	    res.setResponseData(text.toByteArray());
-	    res.setResponseCode(new StringBuilder().append("Non HTTP response code: ").append(e.getClass().getName()).toString());
-	    res.setResponseMessage(new StringBuilder().append("Non HTTP response message: ").append(e.getMessage()).toString());
-	    res.setSuccessful(false);
-	  }
+	{
+		res.setSampleLabel(res.getSampleLabel());
+		res.setDataType("text");
+		java.io.ByteArrayOutputStream text = new java.io.ByteArrayOutputStream(200);
+		e.printStackTrace(new PrintStream(text));
+		res.setResponseData(text.toByteArray());
+		res.setResponseCode(new StringBuilder().append("Non HTTP response code: ").append(e.getClass().getName()).toString());
+		res.setResponseMessage(new StringBuilder().append("Non HTTP response message: ").append(e.getMessage()).toString());
+		res.setSuccessful(false);
+	}
 	public static void doSessonToken(String result){
 		try {
 			JsonParse js = new JsonParse();
@@ -184,16 +184,19 @@ public class ApiTool{
 			Etime=new Date().getTime();
 			String encode=httpsURLConnection.getContentEncoding();
 			if(httpConnectionCode == HttpsURLConnection.HTTP_OK) {
+				logger.info("HTTP_OK");
 				inptStream = httpsURLConnection.getInputStream();
 				result=dealResponseResult(inptStream,encode);
 				res.setResponseData(JSONObject.fromObject(result).toString().replaceAll(",\"", ",\n\"").replace("{\"", "{\n\"").replace("}}", "}\n}"), null);
+				doSessonToken(result);
 			}else{
+				logger.info("HTTP_KO");
 				errorStream= httpsURLConnection.getErrorStream();
 				result=dealResponseResult(errorStream,encode);
 				//Jsonpath.parse(result, ".value.*");
 				res.setResponseData(JSONObject.fromObject(result).toString().replaceAll(",\"", ",\n\"").replace("{\"", "{\n\"").replace("}}", "}\n}"), null);;
 			}
-			doSessonToken(result);
+			logger.info(result);
 			httpsURLConnection.disconnect();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -226,16 +229,19 @@ public class ApiTool{
 	}
 	public static void main(String args[]){
 		String url ="https://api.siocloud.sioeye.cn/functions/login" ;
+
 		HashMap<String, String> params = new HashMap<String, String>();
-        params.put("username","tyokyo@126.com");
-        params.put("password",String2MD5.MD5("123456789"));
-	    params.put("type","app");
-	    
-	    HashMap<String, String> header = new HashMap<String, String>();
+		params.put("username","tyokyo@126.com");
+		params.put("password",String2MD5.MD5("123456789"));
+		params.put("type","app");
+
+		HashMap<String, String> header = new HashMap<String, String>();
 		header.put("Content-Type", "application/json;charset=utf-8");
 		header.put("X_Sioeye_App_Id", "usYhGBBKDMiypaKFV8fc3kE4");
 		header.put("X_Sioeye_App_Sign_Key", "5f3773d461775804ca2c942f8589f1d6,1476178217671");
 		header.put("X_Sioeye_App_Production", "1");
-		//post(url, header, params);
+		HTTPSampleResult httpSampleResult = new HTTPSampleResult();
+		post(httpSampleResult,url, header, params);
+		System.out.println(httpSampleResult.getResponseDataAsString());
 	}
 }

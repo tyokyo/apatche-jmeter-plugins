@@ -3,15 +3,10 @@ package org.apache.jmeter.sampler.gui;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Toolkit;
-
 import javax.swing.JButton;
-
 import kg.apc.jmeter.JMeterPluginsUtils;
-
 import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.VerticalPanel;
-import org.apache.jmeter.sampler.ApiSampler;
-import org.apache.jmeter.sampler.FFmpegSampler;
 import org.apache.jmeter.sampler.VariableSampler;
 import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
 import org.apache.jmeter.testelement.TestElement;
@@ -22,28 +17,24 @@ import org.slf4j.LoggerFactory;
 import sioeye.spider.helpers.UrlHelper;
 import elonmeter.csv.jmeter.HelpPanel;
 
-public class FFmpegSamplerGUI extends AbstractSamplerGui{
+public class VariableSamplerGUI extends AbstractSamplerGui{
 	@Override
 	protected void configureTestElement(TestElement mc) {
 		// TODO Auto-generated method stub
 		super.configureTestElement(mc);
 	}
 	
-	private static final Logger log = LoggerFactory.getLogger(FFmpegSamplerGUI.class);
+	private static final Logger log = LoggerFactory.getLogger(VariableSamplerGUI.class);
 	private static final long serialVersionUID = 1L;
-	private static JLabeledTextField videoPathTextField;
-	private static JLabeledTextField pushUrlTextField;
-	private static JLabeledTextField ffpmegTextField;
+	private static JLabeledTextField variablesTextField;
+	private static JLabeledTextField writeToLocationTextField;
 	public static  JButton borwserFfmpegButton;
-	public static  JButton borwserVideoButton;
 	public static int w;
 	public static int h;
-	public FFmpegSamplerGUI(){
-		ffpmegTextField = new JLabeledTextField("ffmpeg path");
-		pushUrlTextField = new JLabeledTextField("push url");
-		videoPathTextField = new JLabeledTextField("video path");
+	public VariableSamplerGUI(){
+		writeToLocationTextField = new JLabeledTextField("write to file:");
 		borwserFfmpegButton = new JButton("browser");
-		borwserVideoButton = new JButton("browser");
+		variablesTextField = new JLabeledTextField("variable names(,)");
 		init(); 
 	}
 	private void init() {
@@ -63,18 +54,13 @@ public class FFmpegSamplerGUI extends AbstractSamplerGui{
 
 		HorizontalPanel ffmpegPanel = new HorizontalPanel();
 		//serverUrlTextField.setText("https://api.siocloud.sioeye.cn/functions/");
-		ffmpegPanel.add(ffpmegTextField);
+		ffmpegPanel.add(writeToLocationTextField);
 		ffmpegPanel.add(borwserFfmpegButton);
 		mainPanel.add(ffmpegPanel);
 		
 		HorizontalPanel urlPanel = new HorizontalPanel();
-		urlPanel.add(pushUrlTextField);
+		urlPanel.add(variablesTextField);
 		mainPanel.add(urlPanel);
-		
-		HorizontalPanel videoPanel = new HorizontalPanel();
-		videoPanel.add(videoPathTextField);
-		videoPanel.add(borwserVideoButton);
-		mainPanel.add(videoPanel);
 
 		add(mainPanel, BorderLayout.CENTER);
 	}
@@ -88,12 +74,11 @@ public class FFmpegSamplerGUI extends AbstractSamplerGui{
 	@Override
 	public String getStaticLabel() {
 		// TODO Auto-generated method stub
-		return JMeterPluginsUtils.prefixLabel("FFMpeg Sampler");
+		return JMeterPluginsUtils.prefixLabel("Write To File Sampler");
 	}
 	private void initFields(){
-		ffpmegTextField.setText("");
-		pushUrlTextField.setText("");
-		videoPathTextField.setText("");
+		writeToLocationTextField.setText("");
+		variablesTextField.setText("");
 	}
 	@Override
 	public void clearGui() {
@@ -104,11 +89,10 @@ public class FFmpegSamplerGUI extends AbstractSamplerGui{
 	public void modifyTestElement(TestElement sampler) {
 		// TODO Auto-generated method stub
 		super.configureTestElement(sampler);
-		if (sampler instanceof FFmpegSampler) {
-			FFmpegSampler fFmpegSampler = (FFmpegSampler) sampler;
-			fFmpegSampler.setffpmeg(ffpmegTextField.getText());
-			fFmpegSampler.setVideoPushUrl(pushUrlTextField.getText());
-			fFmpegSampler.setVideoPath(videoPathTextField.getText());
+		if (sampler instanceof VariableSampler) {
+			VariableSampler variableSampler = (VariableSampler) sampler;
+			variableSampler.setWriteToPath(writeToLocationTextField.getText());
+			variableSampler.setVariableNames(variablesTextField.getText());
 		}
 	}
 	@Override
@@ -121,11 +105,10 @@ public class FFmpegSamplerGUI extends AbstractSamplerGui{
 	@Override
 	public void configure(TestElement element) {
 		super.configure(element);
-		if(element instanceof FFmpegSampler){
-			FFmpegSampler fFmpegSampler = (FFmpegSampler) element;
-			ffpmegTextField.setText(fFmpegSampler.getffpmeg());
-			videoPathTextField.setText(fFmpegSampler.getVideoPath());
-			pushUrlTextField.setText(fFmpegSampler.getVideoPushUrl());
+		if(element instanceof VariableSampler){
+			VariableSampler variableSampler = (VariableSampler) element;
+			writeToLocationTextField.setText(variableSampler.getWriteToPath());
+			variablesTextField.setText(variableSampler.getVariableNames());
 		}		
 	}
 }

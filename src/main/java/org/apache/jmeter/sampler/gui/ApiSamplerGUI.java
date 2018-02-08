@@ -205,7 +205,8 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 									log.info(detail.toString());
 									String desc = detail.getApiDesc();
 									methodTextField.setText("/functions/"+method);
-									serverUrlTextField.setText(new PropertyHelpers().getServerUrl());
+									//serverUrlTextField.setText(new PropertyHelpers().getServerUrl());
+									serverUrlTextField.setText("${server}");
 									spiderDialog.dispose();
 								}
 							}
