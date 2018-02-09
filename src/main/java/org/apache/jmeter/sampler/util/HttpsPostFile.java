@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -51,9 +52,14 @@ public class HttpsPostFile{
 	private Map<String, String> textParams = new HashMap<String, String>();
 	private Map<String, File> fileparams = new HashMap<String, File>();
 
-	public HttpsPostFile(HTTPSampleResult res,String url) throws Exception {
-		this.url = new URL(url);
-		this.res=res;
+	public HttpsPostFile(HTTPSampleResult res,String url) {
+		try {
+			this.url = new URL(url);
+			this.res=res;
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	// 重新设置要请求的服务器地址，即上传文件的地址。
@@ -64,6 +70,13 @@ public class HttpsPostFile{
 	// 增加一个普通字符串数据到form表单数据中
 	public void addTextParameter(String name, String value) {
 		textParams.put(name, value);
+	}
+	public void addTextParameter(Map<String, String> textMaps) {
+		Set<String> keys = textMaps.keySet();
+		for (String name : keys) {
+			String value=textMaps.get(name);
+			textParams.put(name, value);
+		}
 	}
 
 	// 增加一个文件到form表单数据中
@@ -151,7 +164,7 @@ public class HttpsPostFile{
 	/**
 	 * 发送数据到服务器
 	 */
-	public void send() throws Exception {
+	public void send(){
 		try {
 			initConnection();
 			conn.connect();
@@ -176,7 +189,7 @@ public class HttpsPostFile{
 				res.setResponseData(response,null);
 				res.setSuccessful(false);
 			}
-		} catch (SocketTimeoutException e) {
+		} catch (Exception e) {
 			errorResult(e, res);
 			res.sampleEnd();
 			logger.warn(e.getMessage());

@@ -3,20 +3,28 @@ package org.apache.jmeter.sampler.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -26,26 +34,35 @@ import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import kg.apc.jmeter.JMeterPluginsUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.config.gui.ArgumentsPanel;
 import org.apache.jmeter.gui.GuiPackage;
+import org.apache.jmeter.gui.util.FileDialoger;
 import org.apache.jmeter.gui.util.HorizontalPanel;
+import org.apache.jmeter.gui.util.PowerTableModel;
 import org.apache.jmeter.gui.util.VerticalPanel;
-import org.apache.jmeter.protocol.http.gui.HTTPFileArgsPanel;
+import org.apache.jmeter.protocol.http.util.HTTPFileArg;
 import org.apache.jmeter.sampler.ApiSampler;
 import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
 import org.apache.jmeter.testelement.TestElement;
+import org.apache.jmeter.testelement.property.CollectionProperty;
 import org.apache.jmeter.testelement.property.JMeterProperty;
+import org.apache.jmeter.testelement.property.NullProperty;
+import org.apache.jmeter.util.JMeterUtils;
+import org.apache.jorphan.gui.GuiUtils;
 import org.apache.jorphan.gui.JLabeledTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import elonmeter.csv.jmeter.GridDataSetConfig;
 import elonmeter.csv.jmeter.HelpPanel;
 import sioeye.spider.entities.ApiDetails;
 import sioeye.spider.entities.ApiParameters;
@@ -61,13 +78,25 @@ import sioeye.spider.interfaces.IApiDetails;
 import sioeye.spider.interfaces.IApiParametersSpider;
 import sioeye.spider.interfaces.IApiSpider;
 
-public class ApiSamplerGUI extends AbstractSamplerGui{
+public class ApiSamplerGUI extends AbstractSamplerGui implements ActionListener{
 	@Override
 	protected void configureTestElement(TestElement mc) {
 		// TODO Auto-generated method stub
 		super.configureTestElement(mc);
 	}
+	private static final String CLIPBOARD_LINE_DELIMITERS = "\n"; //$NON-NLS-1$
+	/** When pasting from the clipboard, split parameters on tab */
+	private static final String CLIPBOARD_ARG_DELIMITERS = "\t"; //$NON-NLS-1$
 	
+	public static  String[] columnIdentifiers = {"文件名称","参数名称","MIME类型"};
+	@SuppressWarnings("rawtypes")
+	public static  Class[] columnClasses = {String.class,String.class,String.class};
+	protected PowerTableModel tableModel;
+	protected JTable grid;
+	private JButton add;
+	private JButton browse;
+	private JButton delete;
+	private JButton addFromClipboard;
 	private static final Logger log = LoggerFactory.getLogger(ApiSamplerGUI.class);
 	private static final long serialVersionUID = 1L;
 	private static JRadioButton sessionTokenRadioButton;
@@ -83,7 +112,6 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 	public static JRadioButton varsRadioButton;
 	public static ArgumentsPanel2 parameterArgumentsPanel;
 	public static ArgumentsPanel headerArgumentsPanel;
-	public static HTTPFileArgsPanel fileUpLoadPanel;
 	public static  JButton borwserButton;
 	public static int w;
 	public static int h;
@@ -96,6 +124,60 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		headerArgumentsPanel=new ArgumentsPanel(null);
 		borwserButton = new JButton("browser");
 		init(); 
+	}
+	private void createTableModel() {
+		this.tableModel = new PowerTableModel(columnIdentifiers, columnClasses);
+		this.grid .getTableHeader().setReorderingAllowed(false);
+		this.grid.setModel(this.tableModel);
+		this.grid.getTableHeader().setToolTipText("upload file");
+	}
+	private JTable createGrid() {
+		this.grid = new JTable();
+		createTableModel();
+		this.grid.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);  
+		this.grid.setMinimumSize(new Dimension(200, 100));
+		return this.grid;
+	}
+	private JPanel makeButtonPanel()
+	{
+		this.add = new JButton(JMeterUtils.getResString("add"));
+		this.add.setActionCommand("add");
+		this.add.setEnabled(true);
+		
+		this.browse = new JButton(JMeterUtils.getResString("browse"));
+		this.browse.setActionCommand("browse");
+		
+		this.delete = new JButton(JMeterUtils.getResString("delete"));
+		this.delete.setActionCommand("delete");
+		
+		this.addFromClipboard = new JButton("addFromClipboard(enter-\\t)");		
+		this.addFromClipboard.setActionCommand("AddfromClipboard");
+
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+		this.add.addActionListener(this);
+		this.browse.addActionListener(this);
+		this.delete.addActionListener(this);
+		this.addFromClipboard.addActionListener(this);
+		
+		buttonPanel.add(this.add);
+		buttonPanel.add(this.browse);
+		buttonPanel.add(this.delete);
+		buttonPanel.add(this.addFromClipboard);
+		return buttonPanel;
+	}
+	private JPanel getFileUploadPanel() {
+		JScrollPane scroll = new JScrollPane(createGrid());
+		scroll.setPreferredSize(scroll.getMinimumSize());
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+
+		panel.add(scroll, "Center");
+		panel.add(Box.createVerticalStrut(70), "West");
+		panel.add(makeButtonPanel(), "South");
+		this.grid.revalidate();
+
+		return panel;
 	}
 	public static JTable getHeaderTable(){
 		headerModel = new HeaderTableModel(20);
@@ -256,7 +338,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 
 		Container topPanel = makeTitlePanel();
 		add(HelpPanel.addHelpLinkToPanel(topPanel, UrlHelper.api_sampler_sioeye), BorderLayout.NORTH);
-		
+
 		VerticalPanel mainPanel = new VerticalPanel();
 		mainPanel.add(topPanel);
 
@@ -264,7 +346,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		//serverUrlTextField.setText("https://api.siocloud.sioeye.cn/functions/");
 		serverPanel.add(serverUrlTextField);
 		mainPanel.add(serverPanel);
-		
+
 		HorizontalPanel methodPanel = new HorizontalPanel();
 		methodPanel.add(methodTextField);
 		borwserButton.addActionListener(new ActionListener() {
@@ -277,7 +359,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		});
 		methodPanel.add(borwserButton);
 		mainPanel.add(methodPanel);
-		
+
 		HorizontalPanel sessionPanel = new HorizontalPanel();
 		sessionPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),"自动添加header")); 
 		sessionTokenRadioButton=new JRadioButton("sessiontoken");
@@ -293,7 +375,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 		varsRadioButton.setSelected(true);
 		buttonGroup.add(propsRadioButton);
 		buttonGroup.add(varsRadioButton);
-		
+
 		HorizontalPanel groupPanel = new HorizontalPanel();
 		groupPanel.add(propsRadioButton);
 		groupPanel.add(varsRadioButton);
@@ -307,7 +389,8 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 
 		jTabbedPane.add("Header",headerArgumentsPanel);
 		jTabbedPane.add("Parameter",parameterArgumentsPanel);
-		jTabbedPane.add("Files Upload",fileUpLoadPanel);
+		jTabbedPane.add("Files Upload",getFileUploadPanel());
+		
 		add(jTabbedPane, BorderLayout.CENTER);
 	}
 
@@ -349,6 +432,9 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 			testSmpler.setVars(varsRadioButton.isSelected());
 			testSmpler.setProps(propsRadioButton.isSelected());
 			testSmpler.setStoredVariables(varsTextField.getText());
+
+			CollectionProperty rows = JMeterPluginsUtils.tableModelRowsToCollectionProperty(this.tableModel, "threads_file_upload");
+			testSmpler.setData(rows);
 		}
 	}
 	@Override
@@ -362,21 +448,136 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 	public void configure(TestElement element) {
 		super.configure(element);
 		if(element instanceof ApiSampler){
-			ApiSampler jvp = (ApiSampler) element;
-			sessionTokenRadioButton.setSelected(jvp.getSessionToken());
-			serverUrlTextField.setText(jvp.getServer());
-			methodTextField.setText(jvp.getMethod());
-			varsRadioButton.setSelected(jvp.getVars());
-			propsRadioButton.setSelected(jvp.getProps());
-			varsTextField.setText(jvp.getStoredVariables());
-			JMeterProperty udv = jvp.getUserDefinedVariablesAsProperty();
-			JMeterProperty hdv = jvp.getUserDefinedHeadersAsProperty();
+			ApiSampler sampler = (ApiSampler) element;
+			sessionTokenRadioButton.setSelected(sampler.getSessionToken());
+			serverUrlTextField.setText(sampler.getServer());
+			methodTextField.setText(sampler.getMethod());
+			varsRadioButton.setSelected(sampler.getVars());
+			propsRadioButton.setSelected(sampler.getProps());
+			varsTextField.setText(sampler.getStoredVariables());
+			JMeterProperty udv = sampler.getUserDefinedVariablesAsProperty();
+			JMeterProperty hdv = sampler.getUserDefinedHeadersAsProperty();
 			if (udv != null) {
 				parameterArgumentsPanel.configure((Arguments) udv.getObjectValue());
 			}
 			if (hdv != null) {
 				headerArgumentsPanel.configure((Arguments) hdv.getObjectValue());
 			}
+
+			JMeterProperty threadValues = sampler.getData();
+			if (!(threadValues instanceof NullProperty)) {
+				CollectionProperty columns = (CollectionProperty)threadValues;
+				this.grid.updateUI();
+				JMeterPluginsUtils.collectionPropertyToTableModelRows(columns, this.tableModel);
+				updateUI();
+			} else {
+				log.warn("Received null property instead of collection");
+			}
+
 		}		
+	}
+	private String browseAndGetFilePath()
+	{
+		String path = "";
+		JFileChooser chooser = FileDialoger.promptToOpenFile();
+		if (chooser != null) {
+			File file = chooser.getSelectedFile();
+			if (file != null) {
+				path = file.getPath();
+			}
+		}
+		return path;
+	}
+	protected String[] columnParser(String[] clipboardLine){
+		int columnCount = grid.getColumnCount();
+		String[] column=new String[columnCount];
+		for (int i = 0; i < column.length; i++) {
+			column[i]="";
+		}
+		if (clipboardLine.length==columnCount) {
+			column= clipboardLine;
+		}else if (clipboardLine.length>columnCount) {
+			for (int i = 0; i < columnCount; i++) {
+				column[i]=clipboardLine[i];
+			}
+		}else {
+			for (int i = 0; i < clipboardLine.length; i++) {
+				column[i]=clipboardLine[i];
+			}
+		}
+		return column;
+	}
+	/**
+	 * Add values from the clipboard
+	 * @param lineDelimiter Delimiter string to split clipboard into lines
+	 * @param argDelimiter Delimiter string to split line into key-value pair
+	 */
+	protected void addFromClipboard(String lineDelimiter, String argDelimiter) {
+		GuiUtils.stopTableEditing(grid);
+		int rowCount = grid.getRowCount();
+		try {
+			String clipboardContent = GuiUtils.getPastedText();
+			if(clipboardContent == null) {
+				return;
+			}
+			String[] clipboardLines = clipboardContent.split(lineDelimiter);
+			for (String clipboardLine : clipboardLines) {
+				log.info(clipboardLine);
+				String[] clipboardCols = columnParser(clipboardLine.split(argDelimiter));
+				if (clipboardCols.length > 0) {
+					tableModel.addRow(clipboardCols);
+					log.info(clipboardCols.toString());
+					tableModel.fireTableDataChanged();
+				}
+			}
+			if (grid.getRowCount() > rowCount) {
+				// Highlight (select) and scroll to the appropriate rows.
+				int rowToSelect = tableModel.getRowCount() - 1;
+				grid.setRowSelectionInterval(rowCount, rowToSelect);
+				grid.scrollRectToVisible(grid.getCellRect(rowCount, 0, true));
+			}
+			grid.updateUI();
+		} catch (IOException ioe) {
+			JOptionPane.showMessageDialog(this,
+					"Could not add read arguments from clipboard:\n" + ioe.getLocalizedMessage(), "Error",
+					JOptionPane.ERROR_MESSAGE);
+		} catch (UnsupportedFlavorException ufe) {
+			JOptionPane.showMessageDialog(this,
+					"Could not add retrieve " + DataFlavor.stringFlavor.getHumanPresentableName()
+					+ " from clipboard" + ufe.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	protected void addFromClipboard() {
+		addFromClipboard(CLIPBOARD_LINE_DELIMITERS, CLIPBOARD_ARG_DELIMITERS);
+	}
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		String action = e.getActionCommand();
+		if (action.equals("add")) {
+			tableModel.addNewRow();
+			grid.updateUI();
+		}
+		if (action.equals("AddfromClipboard")) {
+			if (grid.isEditing()) {
+				TableCellEditor cellEditor = grid.getCellEditor(grid.getEditingRow(), grid.getEditingColumn());
+				cellEditor.cancelCellEditing();
+			}
+			addFromClipboard();
+		}
+		int rowSelected = this.grid.getSelectedRow();
+		if (rowSelected>=0) {
+			if (action.equals("delete")) {
+				this.tableModel.removeRow(rowSelected);
+				grid.updateUI();
+			}
+			if (action.equals("browse")) {
+				String path = browseAndGetFilePath();
+				if (StringUtils.isNotBlank(path)){
+					this.tableModel.setValueAt(path, rowSelected, 0);
+					grid.updateUI();
+				}
+			}
+		}
 	}
 }

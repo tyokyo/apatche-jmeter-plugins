@@ -13,7 +13,7 @@ public class HttpsUrl {
 	 */
 	public static void sendPostWithFile(){
 		String url= "https://face.sioeye.cn/face/mface/search_face";
-		String file_png = "D:/soft/Jmeter/SioeyeApi/photo/11hongjie.png";
+		String file_png = "D:/soft/Jmeter/photo/11hongjie.png";
 		try {
 			HttpPostUtil postUtil = new HttpPostUtil(url);
 			postUtil.addTextParameter("current_rotate", "0");
