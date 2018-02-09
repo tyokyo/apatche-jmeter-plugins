@@ -4,21 +4,32 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.zip.GZIPInputStream;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+
+import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
 import org.apache.jmeter.sampler.util.MyX509TrustManager;
+import org.apache.jmeter.samplers.SampleResult;
+import org.apache.jmeter.util.JMeterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * 以Http协议传输文件
  * 
@@ -26,7 +37,10 @@ import org.apache.jmeter.sampler.util.MyX509TrustManager;
  *
  */
 public class HttpsPostFile{
-	private InputStream responseInStream;
+	private  Logger logger =LoggerFactory.getLogger(HttpsPostText.class);
+	private HTTPSampleResult res;
+	private  InputStream postInuptStream=null;
+	private  InputStream  postErrorStream=null;
 	private ByteArrayOutputStream responseOutStream;
 	private OutputStream connOutStream;
 	private final static char[] MULTIPART_CHARS = "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
@@ -37,8 +51,9 @@ public class HttpsPostFile{
 	private Map<String, String> textParams = new HashMap<String, String>();
 	private Map<String, File> fileparams = new HashMap<String, File>();
 
-	public HttpsPostFile(String url) throws Exception {
+	public HttpsPostFile(HTTPSampleResult res,String url) throws Exception {
 		this.url = new URL(url);
+		this.res=res;
 	}
 
 	// 重新设置要请求的服务器地址，即上传文件的地址。
@@ -61,13 +76,82 @@ public class HttpsPostFile{
 		textParams.clear();
 		fileparams.clear();
 	}
+	public static void doSessonToken(String result){
+		try {
+			JsonParse js = new JsonParse();
+			js.setJsonString(result);
+			js.setQueryString(".sessiontoken");
+			List<Object> skens = js.parse();
+			if (skens.size()==1) {
+				String sessiontoken =skens.get(0).toString();
+				JMeterUtils.getJMeterProperties().put("sessiontoken", sessiontoken);
+			}
+			//js.print();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	private  String coverInputStreamResult(InputStream inputStream) {
+		String encode=conn.getContentEncoding();
+		if(inputStream!=null){
+			String resultData = null; 
+			GZIPInputStream gZIPInputStream = null;
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			byte[] data = new byte[1024];
+			int len = 0;
+			try {
+				if(encode!=null&&encode.equals("gzip")){
+					gZIPInputStream = new GZIPInputStream(inputStream);//gzip
+					while((len = gZIPInputStream.read(data)) != -1) {
+						byteArrayOutputStream.write(data, 0, len);
+					}
+				}else{
+					while((len = inputStream.read(data)) != -1) {
+						byteArrayOutputStream.write(data, 0, len);
+					}
+				}
+			} catch (IOException e) {
+				logger.error("Exception",e);
+			}finally {			
+				try {
+					if(byteArrayOutputStream!=null){
+						byteArrayOutputStream.close();
+					}
+					if(gZIPInputStream!=null){
+						gZIPInputStream.close();
+					}
+				} catch (IOException e) {
+					logger.error("Exception",e);
+				}
+			}
+			try {
+				resultData = new String(byteArrayOutputStream.toByteArray(),"UTF-8");
+				byteArrayOutputStream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.error("Exception",e);
+			}
+			//logger.info(resultData);
+			return resultData;
+		}else{
+			return null;	
+		}
+	}
+	private void errorResult(Throwable e, SampleResult res)
+	{
+		res.setSampleLabel(res.getSampleLabel());
+		res.setDataType("text");
+		java.io.ByteArrayOutputStream text = new java.io.ByteArrayOutputStream(200);
+		e.printStackTrace(new PrintStream(text));
+		res.setResponseData(text.toByteArray());
+		res.setResponseCode(new StringBuilder().append("Non HTTP response code: ").append(e.getClass().getName()).toString());
+		res.setResponseMessage(new StringBuilder().append("Non HTTP response message: ").append(e.getMessage()).toString());
+		res.setSuccessful(false);
+	}
 	/**
 	 * 发送数据到服务器
-	 * 
-	 * @return 一个字节包含服务器的返回结果的数组
-	 * @throws Exception
 	 */
-	public byte[] send() throws Exception {
+	public void send() throws Exception {
 		try {
 			initConnection();
 			conn.connect();
@@ -78,41 +162,40 @@ public class HttpsPostFile{
 			writesEnd(connOutStream);
 
 			//read response data
-			responseInStream = conn.getInputStream();
 			connCode = conn.getResponseCode(); 
 			//connect success
 			if(connCode == HttpsURLConnection.HTTP_OK) {
-
+				postInuptStream = conn.getInputStream();
+				String response=coverInputStreamResult(postInuptStream);
+				res.setResponseData(JsonFormatUtil.formatJson(response),null);
+				res.setSuccessful(true);
+				doSessonToken(response);
 			}else{
-
+				postErrorStream=conn.getErrorStream();
+				String response=coverInputStreamResult(postErrorStream);
+				res.setResponseData(response,null);
+				res.setSuccessful(false);
 			}
-			responseOutStream = new ByteArrayOutputStream();
-			int len;
-			byte[] bufferByte = new byte[1024];
-			while ((len = responseInStream.read(bufferByte)) != -1) {
-				responseOutStream.write(bufferByte, 0, len);
-			}
-			responseInStream.close();
-			connOutStream.close();
-			conn.disconnect();
-
-			byte[] resultByte = responseOutStream.toByteArray();
-			responseOutStream.close();
-			return resultByte;
 		} catch (SocketTimeoutException e) {
-			throw new Exception(e);
+			errorResult(e, res);
+			res.sampleEnd();
+			logger.warn(e.getMessage());
 		}finally{
-			if (connOutStream!=null) {
-				connOutStream.close();
-			}
-			if (conn!=null) {
-				conn.disconnect();
-			}
-			if (responseInStream!=null) {
-				responseInStream.close();
-			}
-			if (responseOutStream!=null) {
-				responseOutStream.close();
+			try {
+				if (connOutStream!=null) {
+					connOutStream.close();
+				}
+				if (conn!=null) {
+					conn.disconnect();
+				}
+				if (postInuptStream!=null) {
+					postInuptStream.close();
+				}
+				if (postErrorStream!=null) {
+					postErrorStream.close();
+				}
+			} catch (Exception e2) {
+				// TODO: handle exception
 			}
 		}
 	}
@@ -139,9 +222,9 @@ public class HttpsPostFile{
 		conn.setDoOutput(true);
 		conn.setDoInput(true);
 		conn.setUseCaches(false);
-		conn.setConnectTimeout(3 * 60 * 1000); // 连接超时为10秒
+		conn.setConnectTimeout(30 * 1000); // 连接超时为10秒
 		conn.setRequestMethod("POST");
-		conn.setReadTimeout(60*1000);
+		conn.setReadTimeout(30*1000);
 
 		conn.setRequestProperty("Content-Type","multipart/form-data; boundary=" + boundary);
 

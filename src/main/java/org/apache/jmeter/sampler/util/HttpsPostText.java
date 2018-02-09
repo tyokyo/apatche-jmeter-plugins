@@ -6,25 +6,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-
 import net.sf.json.JSONObject;
-
 import org.apache.jmeter.functions.String2MD5;
 import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
 import org.apache.jmeter.samplers.SampleResult;
@@ -34,12 +27,10 @@ import org.slf4j.LoggerFactory;
 
 public class HttpsPostText{
 	private  Logger logger =LoggerFactory.getLogger(HttpsPostText.class);
-	private  final int ConnectTimeout=20*1000;
-	private  final int ReadTimeout=60*1000;
+	private HTTPSampleResult res;
 	private  InputStream postInuptStream=null;
 	private  InputStream  postErrorStream=null;
 	private  OutputStream connOutStream=null;
-	private  ByteArrayOutputStream responseOutStream=null;
 	private int connCode = -1;
 	private URL url;
 	private HttpsURLConnection conn;
@@ -62,9 +53,10 @@ public class HttpsPostText{
 		this.headers = headers;
 	}
 
-	public HttpsPostText(String url) {
+	public HttpsPostText(HTTPSampleResult res,String url) {
 		try {
 			this.url = new URL(url);
+			this.res=res;
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -89,9 +81,9 @@ public class HttpsPostText{
 		conn.setDoOutput(true);
 		conn.setDoInput(true);
 		conn.setUseCaches(false);
-		conn.setConnectTimeout(3 * 60 * 1000); // 连接超时为10秒
+		conn.setConnectTimeout(30 * 1000); 
 		conn.setRequestMethod("POST");
-		conn.setReadTimeout(60*1000);
+		conn.setReadTimeout(30*1000);
 		setContentLength();
 		setRequestHeaders();
 	}
@@ -111,6 +103,7 @@ public class HttpsPostText{
 	// 普通字符串数据
 	private void writeTextParams(OutputStream out) throws Exception {
 		String paramsData=JSONObject.fromObject(getTextParams()).toString();
+		logger.info(paramsData);
 		byte[] data = paramsData.getBytes();
 		out.write(data);
 	}
@@ -131,7 +124,7 @@ public class HttpsPostText{
 	 * @return 一个字节包含服务器的返回结果的数组
 	 * @throws Exception
 	 */
-	private void  send(){
+	public void  send(){
 		try {
 			initConnection();
 			conn.connect();
@@ -141,14 +134,21 @@ public class HttpsPostText{
 			connCode = conn.getResponseCode(); 
 			if(connCode == HttpsURLConnection.HTTP_OK) {
 				postInuptStream = conn.getInputStream();
-				coverInputStreamResult(postInuptStream);
+				String response=coverInputStreamResult(postInuptStream);
+				res.setResponseData(JsonFormatUtil.formatJson(response),null);
+				res.setSuccessful(true);
+				doSessonToken(response);
 			}else{
 				postErrorStream=conn.getErrorStream();
-				coverInputStreamResult(postErrorStream);
+				String response=coverInputStreamResult(postErrorStream);
+				res.setResponseData(response,null);
+				res.setSuccessful(false);
 			}
 			
 		} catch (Exception e) {
-			//errorResult(e, res);
+			errorResult(e, res);
+			res.sampleEnd();
+			logger.warn(e.getMessage());
 		}finally{
 			try {
 				if (connOutStream!=null) {
@@ -156,9 +156,6 @@ public class HttpsPostText{
 				}
 				if (conn!=null) {
 					conn.disconnect();
-				}
-				if (responseOutStream!=null) {
-					responseOutStream.close();
 				}
 				if (postInuptStream!=null) {
 					postInuptStream.close();
@@ -226,96 +223,11 @@ public class HttpsPostText{
 				// TODO Auto-generated catch block
 				logger.error("Exception",e);
 			}
-			System.out.println(resultData);
+			//logger.info(resultData);
 			return resultData;
 		}else{
 			return null;	
 		}
-	}
-	private  void post(HTTPSampleResult res,String api,Map<String, String> header,Map<String, String> paramsMap) {
-		String result=null;
-		URL url = null;
-		long Stime=0,Etime=0;
-		int httpConnectionCode = -1;
-		HttpsURLConnection httpsURLConnection=null;
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw);
-		String params=JSONObject.fromObject(paramsMap).toString();
-		try {
-			url = new URL(api);
-			byte[] data = params.getBytes();
-			httpsURLConnection = (HttpsURLConnection)url.openConnection();
-			httpsURLConnection.setConnectTimeout(ConnectTimeout);      
-			httpsURLConnection.setReadTimeout(ReadTimeout);
-			httpsURLConnection.setDoInput(true);                  
-			httpsURLConnection.setDoOutput(true);                 
-			httpsURLConnection.setRequestMethod("POST");   
-			httpsURLConnection.setUseCaches(false);         
-			//SSLContext
-			TrustManager[] tm = { new MyX509TrustManager() };
-			SSLContext sslContext;
-			sslContext = SSLContext.getInstance("SSL");
-			sslContext.init(null, tm, new java.security.SecureRandom());
-			//SSLSocketFactory
-			SSLSocketFactory ssf = sslContext.getSocketFactory();
-			httpsURLConnection.setSSLSocketFactory(ssf);
-
-			Set<String> e = header.keySet();
-			for (String key : e) {
-				Object value = header.get(key);
-				httpsURLConnection.setRequestProperty(key,value.toString());
-				//X_Sioeye_App_Id  x_sioeye_app_sign_key X_Sioeye_App_Production  X_sioeye_sessiontoken Content-Type
-			}
-			httpsURLConnection.setRequestProperty("Content-Length", String.valueOf(data.length));
-
-			Stime=new Date().getTime();
-			connOutStream = httpsURLConnection.getOutputStream();
-			connOutStream.write(data);
-			connOutStream.flush();
-			httpConnectionCode = httpsURLConnection.getResponseCode(); 
-			//设置是否连接成功
-			//bean.setHttpConnectionCode(HttpsURLConnection.HTTP_OK);
-			Etime=new Date().getTime();
-			String encode=httpsURLConnection.getContentEncoding();
-			if(httpConnectionCode == HttpsURLConnection.HTTP_OK) {
-				logger.info("HTTP_OK");
-				postInuptStream = httpsURLConnection.getInputStream();
-				res.setResponseData(JSONObject.fromObject(result).toString().replaceAll(",\"", ",\n\"").replace("{\"", "{\n\"").replace("}}", "}\n}"), null);
-			}else{
-				logger.info("HTTP_KO");
-				postErrorStream= httpsURLConnection.getErrorStream();
-				//Jsonpath.parse(result, ".value.*");
-				res.setResponseData(JSONObject.fromObject(result).toString().replaceAll(",\"", ",\n\"").replace("{\"", "{\n\"").replace("}}", "}\n}"), null);;
-			}
-			logger.info(result);
-			httpsURLConnection.disconnect();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			res.sampleEnd();
-			logger.warn(e.getMessage());
-			res.setResponseMessage(e.getMessage());
-		}finally {
-			try {
-				if(postInuptStream!=null) {
-					postInuptStream.close();
-				}
-				if(connOutStream!=null) {
-					connOutStream.close();
-				}
-				if(postErrorStream!=null){
-					postErrorStream.close();
-				}
-				if(sw!=null){
-					sw.close();
-				}
-				if(pw!=null){
-					pw.close();
-				}
-			} catch (IOException e) {
-				logger.error("Exception",e);
-			}
-		}
-		long responseTime = Etime-Stime;
 	}
 	public static void main(String args[]){
 		String url ="https://api.siocloud.sioeye.cn/functions/login" ;
@@ -330,12 +242,11 @@ public class HttpsPostText{
 		headers.put("X_Sioeye_App_Id", "usYhGBBKDMiypaKFV8fc3kE4");
 		headers.put("X_Sioeye_App_Sign_Key", "5f3773d461775804ca2c942f8589f1d6,1476178217671");
 		headers.put("X_Sioeye_App_Production", "1");
-
-		HttpsPostText postText = new HttpsPostText(url);
+		
+		HTTPSampleResult res = new HTTPSampleResult();
+		HttpsPostText postText = new HttpsPostText(res,url);
 		postText.setHeaders(headers);
 		postText.setTextParams(params);
 		postText.send();
-
-		HTTPSampleResult httpSampleResult = new HTTPSampleResult();
 	}
 }

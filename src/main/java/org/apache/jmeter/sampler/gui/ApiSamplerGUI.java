@@ -37,6 +37,7 @@ import org.apache.jmeter.config.gui.ArgumentsPanel;
 import org.apache.jmeter.gui.GuiPackage;
 import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.VerticalPanel;
+import org.apache.jmeter.protocol.http.gui.HTTPFileArgsPanel;
 import org.apache.jmeter.sampler.ApiSampler;
 import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
 import org.apache.jmeter.testelement.TestElement;
@@ -82,6 +83,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 	public static JRadioButton varsRadioButton;
 	public static ArgumentsPanel2 parameterArgumentsPanel;
 	public static ArgumentsPanel headerArgumentsPanel;
+	public static HTTPFileArgsPanel fileUpLoadPanel;
 	public static  JButton borwserButton;
 	public static int w;
 	public static int h;
@@ -305,6 +307,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui{
 
 		jTabbedPane.add("Header",headerArgumentsPanel);
 		jTabbedPane.add("Parameter",parameterArgumentsPanel);
+		jTabbedPane.add("Files Upload",fileUpLoadPanel);
 		add(jTabbedPane, BorderLayout.CENTER);
 	}
 

@@ -100,15 +100,8 @@ public class ApiTool{
 		return headerBuffer.toString();
 	}
 	public static String queryString(Map<String, String> paramsMap){
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("{");
-		for (String key : paramsMap.keySet()) {
-			String value = paramsMap.get(key);
-			String line = String.format("%s:%s", key,value);
-			buffer.append(line+"\n");
-		}
-		buffer.append("}");
-		return buffer.toString();
+		String paramsData=JSONObject.fromObject(paramsMap).toString();
+		return JsonFormatUtil.formatJson(paramsData);
 	}
 	public static void errorResult(Throwable e, SampleResult res)
 	{

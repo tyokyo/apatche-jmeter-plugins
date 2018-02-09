@@ -14,6 +14,8 @@ import net.minidev.json.JSONObject;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
 import org.apache.jmeter.sampler.util.ApiTool;
+import org.apache.jmeter.sampler.util.HttpsPostText;
+import org.apache.jmeter.sampler.util.JsonFormatUtil;
 import org.apache.jmeter.sampler.util.JsonParse;
 import org.apache.jmeter.samplers.AbstractSampler;
 import org.apache.jmeter.samplers.SampleResult;
@@ -44,6 +46,7 @@ public class ApiSampler extends AbstractSampler {
 	private static Logger log = LoggerFactory.getLogger(ApiSampler.class);
 	private static final String USER_DEFINED_VARIABLES = "ApiSampler.user_defined_variables"; 
 	private static final String USER_DEFINED_HEADERS = "ApiSampler.user_defined_headers"; 
+	private static final String USER_DEFINED_FILES_UPLOAD = "ApiSampler.user_defined_files"; 
 	public static final DecimalFormat decimalFormatter = new DecimalFormat("#.#");
 	static {
 		decimalFormatter.setMaximumFractionDigits(340); 
@@ -261,22 +264,26 @@ public class ApiSampler extends AbstractSampler {
 		}
 		//ApiTool.post(res,url, getUserDefinedHeaders(), getUserDefinedVariables());
 		Map<String, String> paramsMap=getUserDefinedVariables();
-		res.setQueryString(ApiTool.queryString(paramsMap).replace("{", "{\n").replace("}", "}\n").replace(",", ",\n"));
-		ApiTool.post(res,url, headers, paramsMap);
+		String queryString =ApiTool.queryString(paramsMap);
+		res.setQueryString(queryString);
 		
-		//resonseData=bean.getResponsehtml();
+		//ApiTool.post(res,url, headers, paramsMap);
+		
+		HttpsPostText postText = new HttpsPostText(res,url);
+		postText.setHeaders(headers);
+		postText.setTextParams(paramsMap);
+		postText.send();
+		
 		res.setSampleLabel(getName());
 		//res.setResponseData("setResponseData", null);
 		res.setDataType(SampleResult.TEXT);
 		//String varLogsString = storeResponseVaribles(getThreadContext(), new String(res.getResponseData()),getStoredVariables());
-		try {
+		if(res.isSuccessful()){
 			String varLogsString = storeResponseVaribles(getThreadContext(), new String(res.getResponseData()),getStoredVariables(),"");
 			log.info(varLogsString);
-		} catch (Exception e) {
-			// TODO: handle exception
 		}
 		//res.setResponseData(new String(res.getResponseData())+varLogsString,null);
-		res.setResponseData(new String(res.getResponseData()),null);
+		//res.setResponseData(new String(res.getResponseData()),null);
 		res.setRequestHeaders(ApiTool.getHeaderStrings(headers)+"\n[Thread Group Variables] \n"+getVariables(getThreadContext()));
 		//res.setSamplerData(ApiTool.getSamplerData(url, headers, getUserDefinedVariables())+"\n"+varLogsString+"");
 		res.setResponseOK();
@@ -311,6 +318,12 @@ public class ApiSampler extends AbstractSampler {
 	}
 	public JMeterProperty getUserDefinedHeadersAsProperty() {
 		return getProperty(USER_DEFINED_HEADERS);
+	}
+	public void setFilesUpLoad(Arguments vars) {
+		setProperty(new TestElementProperty(USER_DEFINED_FILES_UPLOAD, vars));
+	}
+	public JMeterProperty getFilesUpLoadAsProperty() {
+		return getProperty(USER_DEFINED_FILES_UPLOAD);
 	}
 	public Map<String, String> getUserDefinedVariables() {
 		Arguments args = getVariables();
