@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -19,12 +18,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-
 import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
 import org.apache.jmeter.sampler.util.MyX509TrustManager;
 import org.apache.jmeter.samplers.SampleResult;
@@ -42,7 +39,6 @@ public class HttpsPostFile{
 	private HTTPSampleResult res;
 	private  InputStream postInuptStream=null;
 	private  InputStream  postErrorStream=null;
-	private ByteArrayOutputStream responseOutStream;
 	private OutputStream connOutStream;
 	private final static char[] MULTIPART_CHARS = "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 	private int connCode = -1;

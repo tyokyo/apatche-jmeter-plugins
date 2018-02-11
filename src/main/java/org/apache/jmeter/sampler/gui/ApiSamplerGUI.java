@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -38,9 +37,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-
 import kg.apc.jmeter.JMeterPluginsUtils;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.config.gui.ArgumentsPanel;
@@ -49,7 +46,6 @@ import org.apache.jmeter.gui.util.FileDialoger;
 import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.PowerTableModel;
 import org.apache.jmeter.gui.util.VerticalPanel;
-import org.apache.jmeter.protocol.http.util.HTTPFileArg;
 import org.apache.jmeter.sampler.ApiSampler;
 import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
 import org.apache.jmeter.testelement.TestElement;
@@ -61,8 +57,6 @@ import org.apache.jorphan.gui.GuiUtils;
 import org.apache.jorphan.gui.JLabeledTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import elonmeter.csv.jmeter.GridDataSetConfig;
 import elonmeter.csv.jmeter.HelpPanel;
 import sioeye.spider.entities.ApiDetails;
 import sioeye.spider.entities.ApiParameters;
@@ -80,6 +74,15 @@ import sioeye.spider.interfaces.IApiSpider;
 
 public class ApiSamplerGUI extends AbstractSamplerGui implements ActionListener{
 	@Override
+	public void updateUI() {
+		// TODO Auto-generated method stub
+		super.updateUI();
+		if (this.tableModel != null) {
+			ApiSampler utgForPreview = new ApiSampler();
+			utgForPreview.setData(JMeterPluginsUtils.tableModelRowsToCollectionPropertyEval(this.tableModel, "threads_file_upload"));
+		}
+	}
+	@Override
 	protected void configureTestElement(TestElement mc) {
 		// TODO Auto-generated method stub
 		super.configureTestElement(mc);
@@ -87,7 +90,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui implements ActionListener{
 	private static final String CLIPBOARD_LINE_DELIMITERS = "\n"; //$NON-NLS-1$
 	/** When pasting from the clipboard, split parameters on tab */
 	private static final String CLIPBOARD_ARG_DELIMITERS = "\t"; //$NON-NLS-1$
-	
+
 	public static  String[] columnIdentifiers = {"文件名称","参数名称","MIME类型"};
 	@SuppressWarnings("rawtypes")
 	public static  Class[] columnClasses = {String.class,String.class,String.class};
@@ -143,13 +146,13 @@ public class ApiSamplerGUI extends AbstractSamplerGui implements ActionListener{
 		this.add = new JButton(JMeterUtils.getResString("add"));
 		this.add.setActionCommand("add");
 		this.add.setEnabled(true);
-		
+
 		this.browse = new JButton(JMeterUtils.getResString("browse"));
 		this.browse.setActionCommand("browse");
-		
+
 		this.delete = new JButton(JMeterUtils.getResString("delete"));
 		this.delete.setActionCommand("delete");
-		
+
 		this.addFromClipboard = new JButton("addFromClipboard(enter-\\t)");		
 		this.addFromClipboard.setActionCommand("AddfromClipboard");
 
@@ -159,7 +162,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui implements ActionListener{
 		this.browse.addActionListener(this);
 		this.delete.addActionListener(this);
 		this.addFromClipboard.addActionListener(this);
-		
+
 		buttonPanel.add(this.add);
 		buttonPanel.add(this.browse);
 		buttonPanel.add(this.delete);
@@ -390,7 +393,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui implements ActionListener{
 		jTabbedPane.add("Header",headerArgumentsPanel);
 		jTabbedPane.add("Parameter",parameterArgumentsPanel);
 		jTabbedPane.add("Files Upload",getFileUploadPanel());
-		
+
 		add(jTabbedPane, BorderLayout.CENTER);
 	}
 

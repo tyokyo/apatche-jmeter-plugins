@@ -9,11 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import kg.apc.jmeter.JMeterPluginsUtils;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.gui.util.PowerTableModel;
@@ -34,8 +32,6 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.jmeter.samplers.Entry;
-
-import com.HttpPostUtil;
 import com.jayway.jsonpath.JsonPath;
 
 public class ApiSampler extends AbstractSampler {
