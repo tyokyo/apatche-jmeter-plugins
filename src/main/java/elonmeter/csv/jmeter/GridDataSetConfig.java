@@ -9,8 +9,6 @@ import org.apache.jmeter.testelement.TestStateListener;
 import org.apache.jmeter.testelement.property.CollectionProperty;
 import org.apache.jmeter.testelement.property.JMeterProperty;
 import org.apache.jmeter.testelement.property.NullProperty;
-import org.apache.jmeter.testelement.property.StringProperty;
-import org.apache.jmeter.threads.JMeterContext;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.apache.jmeter.util.JMeterUtils;
@@ -20,7 +18,6 @@ import org.apache.jorphan.util.JOrphanUtils;
 import org.apache.log.Logger;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 import kg.apc.jmeter.JMeterPluginsUtils;
 
@@ -67,7 +64,7 @@ public class GridDataSetConfig extends ConfigTestElement implements NoThreadClon
 			for (int i = 0; i < headers.length; i++) {
 				str[i]=String.class;
 			}
-			
+
 			PowerTableModel dataModel = new PowerTableModel(headers, str);
 			String[] chunks = loadProp.split("\\)");
 
@@ -88,7 +85,7 @@ public class GridDataSetConfig extends ConfigTestElement implements NoThreadClon
 		log.debug("Parsing chunk: " + chunk);
 		String[] parts = chunk.split("[(,]");
 		String loadVar = parts[0].trim();
-
+		log.info("loadVar-"+loadVar);
 		if (loadVar.equalsIgnoreCase("spawn")) {
 			Integer[] row = new Integer[5];
 			row[0] = Integer.valueOf(Integer.parseInt(parts[1].trim()));
@@ -109,35 +106,40 @@ public class GridDataSetConfig extends ConfigTestElement implements NoThreadClon
 	private void readTableVariables() {
 		JMeterProperty threadValues=getData();
 		CollectionProperty prop = (CollectionProperty)threadValues;
-		int rowC=prop.size();
-		if (rowC==0) {
+		int rowCount=prop.size();
+		if (rowCount==0) {
 			return;
 		}
-		if (curPos==rowC) {
-			curPos=0;
-			//return;
+		SequenceNumber curPosNo = new SequenceNumber(rowCount-1);  
+		int curPosition = curPosNo.getNextNum();
+		log.info("current-position-"+curPosition);
+		/*if (rowCount==0) {
+			return;
 		}
+		if (curPos==rowCount) {
+			curPos=0;
+		}*/
 		try {
-			JMeterProperty jMeterProperty =prop.get(curPos);
+			//JMeterProperty jMeterProperty =prop.get(curPos);
 			@SuppressWarnings("unchecked")
-			ArrayList<JMeterProperty> rowObject = (ArrayList<JMeterProperty>) prop.get(curPos).getObjectValue();
-			int rowSize=rowObject.size();
-			String[] values=new String[rowSize];
-			for (int i = 0; i < rowSize; i++) {
+			ArrayList<JMeterProperty> rowObject = (ArrayList<JMeterProperty>) prop.get(curPosition).getObjectValue();
+			int columnSize=rowObject.size();
+			String[] values=new String[columnSize];
+			for (int i = 0; i < columnSize; i++) {
 				values[i]=rowObject.get(i).getStringValue();
 				log.info(i+"-"+rowObject.get(i).getStringValue());
 			}
 			JMeterVariables variables = JMeterContextService.getContext().getVariables();
 			putVariables(variables, getDestinationVariableKeys(), values);
 			
-			curPos=curPos+1;
+			//curPos=curPos+1;
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
-			throw new JMeterStopThreadException(curPos+"-"+rowC+"All records in the table have been passed.");
+			throw new JMeterStopThreadException(curPos+"-"+rowCount+"All records in the table have been passed.");
 		}
 	}
-	
+
 
 	public String[] getDestinationVariableKeys() {
 		String vars = getVariableNames();
@@ -164,7 +166,7 @@ public class GridDataSetConfig extends ConfigTestElement implements NoThreadClon
 
 	@Override
 	public void testStarted(String s) {
-		
+
 	}
 
 	@Override
@@ -174,7 +176,7 @@ public class GridDataSetConfig extends ConfigTestElement implements NoThreadClon
 
 	@Override
 	public void testEnded(String s) {
-		
+
 	}
 	public String getVariableNames() {
 		return getPropertyAsString(VARIABLE_NAMES);
@@ -191,7 +193,7 @@ public class GridDataSetConfig extends ConfigTestElement implements NoThreadClon
 	public void setRandomOrder(boolean randomOrder) {
 		setProperty(RANDOM_ORDER, randomOrder);
 	}
-	
+
 	public boolean isRewindOnTheEndOfList() {
 		return getPropertyAsBoolean(REWIND_ON_THE_END);
 	}

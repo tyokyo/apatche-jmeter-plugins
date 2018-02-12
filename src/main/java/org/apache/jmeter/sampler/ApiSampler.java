@@ -9,9 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import kg.apc.jmeter.JMeterPluginsUtils;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.gui.util.PowerTableModel;
@@ -32,6 +34,7 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.jmeter.samplers.Entry;
+
 import com.jayway.jsonpath.JsonPath;
 
 public class ApiSampler extends AbstractSampler {
@@ -339,6 +342,12 @@ public class ApiSampler extends AbstractSampler {
 			//upload file
 			if (count>=1) {
 				HttpsPostFile postUtil = new HttpsPostFile(res,url);
+				try {
+					postUtil.setHeaders(headers);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				postUtil.addTextParameter(paramsMap);
 				for (int rowN = 0; rowN < count; rowN++) {
 					@SuppressWarnings("unchecked")
@@ -353,7 +362,8 @@ public class ApiSampler extends AbstractSampler {
 					}
 					if (!isNotBlank) {
 						String _file_path = rowObject.get(0).getStringValue();
-						postUtil.addFileParameter("file",new File(_file_path) );
+						String argumentName = rowObject.get(1).getStringValue();
+						postUtil.addFileParameter(argumentName,new File(_file_path) );
 						file_upLoad_size=file_upLoad_size+1;
 					}
 				}

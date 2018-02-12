@@ -47,6 +47,7 @@ public class HttpsPostFile{
 	private String boundary = null;
 	private Map<String, String> textParams = new HashMap<String, String>();
 	private Map<String, File> fileparams = new HashMap<String, File>();
+	private Map<String, String> headers = new HashMap<String, String>();
 
 	public HttpsPostFile(HTTPSampleResult res,String url) {
 		try {
@@ -61,6 +62,10 @@ public class HttpsPostFile{
 	// 重新设置要请求的服务器地址，即上传文件的地址。
 	public void setUrl(String url) throws Exception {
 		this.url = new URL(url);
+	}
+	
+	public void setHeaders(Map<String, String> headers) throws Exception {
+		this.headers = headers;
 	}
 
 	// 增加一个普通字符串数据到form表单数据中
@@ -235,6 +240,16 @@ public class HttpsPostFile{
 		conn.setRequestMethod("POST");
 		conn.setReadTimeout(30*1000);
 
+		for (String key : headers.keySet()) {
+			String value = headers.get(key);
+			conn.setRequestProperty(key, value);
+		}
+		
+		/*conn.setRequestProperty("X_Sioeye_App_Id", "usYhGBBKDMiypaKFV8fc3kE4");
+		conn.setRequestProperty("X_Sioeye_App_Sign_Key", "5f3773d461775804ca2c942f8589f1d6,1476178217671");
+		conn.setRequestProperty("X_Sioeye_App_Production", "1");
+		conn.setRequestProperty("X_sioeye_sessiontoken", "61f5d8f62c19f60771c8925c0304da2a");*/
+		
 		conn.setRequestProperty("Content-Type","multipart/form-data; boundary=" + boundary);
 
 	}
@@ -247,8 +262,7 @@ public class HttpsPostFile{
 			String value = textParams.get(name);
 
 			out.write(("--" + boundary + "\r\n").getBytes());
-			out.write(("Content-Disposition: form-data; name=\"" + name + "\"\r\n")
-					.getBytes());
+			out.write(("Content-Disposition: form-data; name=\"" + name + "\"\r\n").getBytes());
 			out.write(("\r\n").getBytes());
 			out.write((encode(value) + "\r\n").getBytes());
 		}
@@ -262,13 +276,9 @@ public class HttpsPostFile{
 			File value = fileparams.get(name);
 
 			out.write(("--" + boundary + "\r\n").getBytes());
-			out.write(("Content-Disposition: form-data; name=\"" + name
-					+ "\"; filename=\"" + encode(value.getName()) + "\"\r\n")
-					.getBytes());
-			out.write(("Content-Type: " + getContentType(value) + "\r\n")
-					.getBytes());
-			out.write(("Content-Transfer-Encoding: " + "binary" + "\r\n")
-					.getBytes());
+			out.write(("Content-Disposition: form-data; name=\"" + name+ "\"; filename=\"" + encode(value.getName()) + "\"\r\n").getBytes());
+			out.write(("Content-Type: " + getContentType(value) + "\r\n").getBytes());
+			out.write(("Content-Transfer-Encoding: " + "binary" + "\r\n").getBytes());
 
 			out.write(("\r\n").getBytes());
 
@@ -298,7 +308,8 @@ public class HttpsPostFile{
 		} else if (fileName.endsWith(".png")) {
 			return "image/png";
 		}
-		return "application/octet-stream";
+		//return "application/octet-stream";
+		return "multipart/form-data";
 	}
 
 	// 对包含中文的字符串进行转码，此为UTF-8。服务器那边要进行一次解码

@@ -40,6 +40,7 @@ public class HttpPostUtil {
 	private String boundary = null;
 	private Map<String, String> textParams = new HashMap<String, String>();
 	private Map<String, File> fileparams = new HashMap<String, File>();
+	private Map<String, File> headers = new HashMap<String, File>();
 
 	public HttpPostUtil(String url) throws Exception {
 		this.url = new URL(url);
@@ -54,6 +55,11 @@ public class HttpPostUtil {
 	public void addTextParameter(String name, String value) {
 		textParams.put(name, value);
 	}
+	
+	// 增加一个普通字符串数据到form表单数据中
+		public void addHeaders(Map<String, File> headers) {
+			this.headers=headers;
+		}
 
 	// 增加一个文件到form表单数据中
 	public void addFileParameter(String name, File value) {
@@ -80,9 +86,9 @@ public class HttpPostUtil {
 			writeFileParams(connOutStream);
 			writeStringParams(connOutStream);
 			writesEnd(connOutStream);
-
+			
 			//read response data
-			 responseInStream = conn.getInputStream();
+			responseInStream = conn.getInputStream();
 			connCode = conn.getResponseCode(); 
 			//connect success
 			if(connCode == HttpsURLConnection.HTTP_OK) {
@@ -98,14 +104,17 @@ public class HttpPostUtil {
 			}
 			responseInStream.close();
 			connOutStream.close();
-			conn.disconnect();
 			
+			
+			conn.disconnect();
+
 			byte[] resultByte = responseOutStream.toByteArray();
 			responseOutStream.close();
 			return resultByte;
 		} catch (SocketTimeoutException e) {
 			throw new Exception(e);
 		}finally{
+			
 			if (connOutStream!=null) {
 				connOutStream.close();
 			}
@@ -139,16 +148,21 @@ public class HttpPostUtil {
 		//SSLSocketFactory
 		SSLSocketFactory ssf = sslContext.getSocketFactory();
 		conn.setSSLSocketFactory(ssf);
-		
+
 		conn.setDoOutput(true);
 		conn.setDoInput(true);
 		conn.setUseCaches(false);
 		conn.setConnectTimeout(3 * 60 * 1000); // 连接超时为10秒
 		conn.setRequestMethod("POST");
 		conn.setReadTimeout(60*1000);
+
+		conn.setRequestProperty("X_Sioeye_App_Id", "usYhGBBKDMiypaKFV8fc3kE4");
+		conn.setRequestProperty("X_Sioeye_App_Sign_Key", "5f3773d461775804ca2c942f8589f1d6,1476178217671");
+		conn.setRequestProperty("X_Sioeye_App_Production", "1");
+		conn.setRequestProperty("X_sioeye_sessiontoken", "61f5d8f62c19f60771c8925c0304da2a");
 		
 		conn.setRequestProperty("Content-Type","multipart/form-data; boundary=" + boundary);
-		
+
 	}
 
 	// 普通字符串数据

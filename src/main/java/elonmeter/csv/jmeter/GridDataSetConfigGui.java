@@ -47,7 +47,6 @@ public class GridDataSetConfigGui extends AbstractConfigGui implements TableMode
 	public static String varChangedNewValue="";
 	public GridDataSetConfigGui() {
 		initGui();
-		initGuiValues();
 	}
 	private void createTableModel() {
 		this.tableModel = new PowerTableModel(columnIdentifiers, columnClasses);
@@ -116,11 +115,6 @@ public class GridDataSetConfigGui extends AbstractConfigGui implements TableMode
 		add(topPanel, BorderLayout.NORTH);
 		add(createParamsPanel(), BorderLayout.CENTER);
 	}
-
-	private void initGuiValues() {
-		variableTextField.setText("");
-		tableModel.clearData();
-	}
 	@Override
 	public String getLabelResource() {
 		return "table_data_set_config";
@@ -128,7 +122,7 @@ public class GridDataSetConfigGui extends AbstractConfigGui implements TableMode
 
 	@Override
 	public String getStaticLabel() {
-		return "Grid Data Set Config";
+		return "@Grid Data Set Config";
 	}
 
 	@Override
@@ -197,7 +191,9 @@ public class GridDataSetConfigGui extends AbstractConfigGui implements TableMode
 	@Override
 	public void clearGui() {
 		super.clearGui();
-		initGuiValues();
+		variableTextField.setText("");
+	    this.tableModel.clearData();
+	    this.tableModel.fireTableDataChanged();
 	}
 	@Override
 	public void editingCanceled(ChangeEvent arg0) {

@@ -406,7 +406,8 @@ public class ApiSamplerGUI extends AbstractSamplerGui implements ActionListener{
 	@Override
 	public String getStaticLabel() {
 		// TODO Auto-generated method stub
-		return JMeterPluginsUtils.prefixLabel("Api Sampler");
+		//return JMeterPluginsUtils.prefixLabel("Api Sampler");
+		return "@HTTP请求-Api Sampler";
 	}
 	private void initFields(){
 		sessionTokenRadioButton.setSelected(false);

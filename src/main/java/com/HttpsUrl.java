@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
+import org.apache.jmeter.sampler.util.HttpsPostFile;
+
 public class HttpsUrl {
 	/**
 	 * HttpsURLConnection上传文件流
@@ -30,7 +33,22 @@ public class HttpsUrl {
 			e.printStackTrace();
 		}
 	}
-	public static void sendPostNoFile(){
+	public static void sendPostWithFile_Multipart(){
+		String url= "https://gateway.microsrv.sioeye.cn/functions/set_conversationinfo_preview";
+		String file_png = "D:/soft/Jmeter/photo/11hongjie.png";
+		try {
+			HttpPostUtil postUtil = new HttpPostUtil(url);
+			postUtil.addFileParameter("upload",new File(file_png) );
+
+			byte[]  resultByte = postUtil.send();
+			String resultString=new String(resultByte);
+			System.out.println(resultString);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public static void sendPostWithText(){
 		String url= "https://api.siocloud.sioeye.cn/functions/login";
 		try {
 			HttpPostUtil postUtil = new HttpPostUtil(url);
@@ -40,6 +58,7 @@ public class HttpsUrl {
 			headers.put("X_Sioeye_App_Id", "usYhGBBKDMiypaKFV8fc3kE4");
 			headers.put("X_Sioeye_App_Sign_Key", "5f3773d461775804ca2c942f8589f1d6,1476178217671");
 			headers.put("X_Sioeye_App_Production", "1");
+			
 			
 			postUtil.addTextParameter("type", "web");
 			postUtil.addTextParameter("username", "tyokyo@126.com");
@@ -55,6 +74,7 @@ public class HttpsUrl {
 	}
 	public static void main(String[] args)  {
 		sendPostWithFile();
-		//sendPostNoFile();
+		sendPostWithFile_Multipart();
+		//sendPostWithText();
 	}
 }
