@@ -110,9 +110,9 @@ public class GridDataSetConfig extends ConfigTestElement implements NoThreadClon
 		if (rowCount==0) {
 			return;
 		}
-		SequenceNumber curPosNo = new SequenceNumber(rowCount-1);  
+		SequenceNumber curPosNo = new SequenceNumber(rowCount);  
 		int curPosition = curPosNo.getNextNum();
-		log.info("current-position-"+curPosition);
+		log.info(rowCount+"-cur-"+curPosition);
 		/*if (rowCount==0) {
 			return;
 		}
