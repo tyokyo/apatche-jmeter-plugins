@@ -6,11 +6,11 @@ import java.util.Date;
 public class Test {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		long timeStampSec = System.currentTimeMillis()/1000+10*60;
+		long timeStampSec = System.currentTimeMillis()/1000+60*60;
 		String timestamp = String.format("%010d", timeStampSec);
 		System.out.println(timestamp);
 
-		timeStampSec = timeStampSec+60*60;
+		timeStampSec = 1518491335+60*60*25;
 		timestamp = String.format("%010d", timeStampSec);
 		System.out.println(timestamp);
 
