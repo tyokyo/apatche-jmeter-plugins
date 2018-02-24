@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import kg.apc.jmeter.JMeterPluginsUtils;
 import net.minidev.json.JSONArray;
@@ -17,6 +18,7 @@ import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.gui.util.PowerTableModel;
+import org.apache.jmeter.protocol.http.control.Header;
 import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
 import org.apache.jmeter.sampler.util.ApiTool;
 import org.apache.jmeter.sampler.util.HttpsPostFile;
@@ -39,6 +41,7 @@ import com.jayway.jsonpath.JsonPath;
 
 public class ApiSampler extends AbstractSampler {
 	private static final long serialVersionUID = 1L;
+	private static final Pattern PORT_PATTERN = Pattern.compile("\\d+");
 	public static  String[] columnIdentifiers = {"文件名称","参数名称","MIME类型"};
 	@SuppressWarnings("rawtypes")
 	public static  Class[] columnClasses = {String.class,String.class,String.class};
@@ -233,6 +236,28 @@ public class ApiSampler extends AbstractSampler {
 		}
 		return buffer.toString();
 	}
+	public CollectionProperty getHeaderManager() {
+		CollectionProperty columns=null;
+		JMeterProperty headerProperty = getProperty("HeaderManager.headers");
+		if (!(headerProperty instanceof NullProperty)) {
+			columns = (CollectionProperty)headerProperty;
+		}
+		return columns;
+	}
+	protected void setConnectionHeaders(Map<String, String> headersMap)
+	{
+		CollectionProperty headsArrayList =getHeaderManager();
+		if (headsArrayList!=null) {
+			int count = headsArrayList.size();
+			for (int rowN = 0; rowN < count; rowN++) {
+				Header header = (Header) headsArrayList.get(rowN).getObjectValue();
+				String name=header.getName();
+				String value =header.getValue();
+				headersMap.put(name, value);
+			}
+		}
+	}
+
 	public  String storeResponseVaribles(JMeterContext threadContext,String json,String keyString){
 		//log.warn(json);
 		StringBuffer buffer=new StringBuffer();
@@ -303,7 +328,9 @@ public class ApiSampler extends AbstractSampler {
 		}
 		res.setHTTPMethod("POST");
 		Map<String, String> headers=getUserDefinedHeaders();
-
+		//Add HTTP信息头管理器
+		setConnectionHeaders(headers);
+		
 		if (getSessionToken()) {
 			JMeterContext threadContext = getThreadContext();
 			JMeterVariables variables = threadContext.getVariables();
