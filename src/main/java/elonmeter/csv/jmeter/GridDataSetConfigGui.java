@@ -171,12 +171,13 @@ public class GridDataSetConfigGui extends AbstractConfigGui implements TableMode
 				}
 				CollectionProperty columns = (CollectionProperty)threadValues;
 				String[] newIdentifiers=utg.getVariableNames().split(",");
-				System.out.println(newIdentifiers.length);
+				//System.out.println(newIdentifiers.length);
 				for (String Identifier : newIdentifiers) {
 					if (Identifier.length()==0) {
 						
 					}else {
 						tableModel.addNewColumn(Identifier,String.class);
+						System.out.println("===========add============:"+Identifier);
 					}
 				}
 				this.grid.updateUI();
@@ -198,7 +199,7 @@ public class GridDataSetConfigGui extends AbstractConfigGui implements TableMode
 	@Override
 	public void editingCanceled(ChangeEvent arg0) {
 		// TODO Auto-generated method stub
-
+		
 	}
 	@Override
 	public void editingStopped(ChangeEvent arg0) {
@@ -208,9 +209,9 @@ public class GridDataSetConfigGui extends AbstractConfigGui implements TableMode
 	@Override
 	public void tableChanged(TableModelEvent arg0) {
 		// TODO Auto-generated method stub
-		System.out.println("tableChanged-Listener");
+		//System.out.println("tableChanged-Listener");
 		String header=getTableHeader();
-		System.out.println(header);
+		//System.out.println(header);
 		variableTextField.setText(header);
 	}
 	public String getTableHeader(){

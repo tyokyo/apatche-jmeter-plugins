@@ -62,7 +62,7 @@ implements ChangeListener
 		assertPanel.add(this.ifJsonField);
 		assertPanel.add(this.operator);
 		assertPanel.add(this.expectField);
-		assertPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),"If True")); 
+		assertPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),"If ")); 
 
 		VerticalPanel panel = new VerticalPanel();
 		//panel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
