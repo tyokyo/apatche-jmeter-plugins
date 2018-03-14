@@ -262,7 +262,14 @@ public class HttpsPostFile{
 		for (Iterator<String> it = keySet.iterator(); it.hasNext();) {
 			String name = it.next();
 			String value = textParams.get(name);
-
+			//if value is array
+			String start = "[";
+			String end = "]";
+			if (value.startsWith(start)&&value.endsWith(end)) {
+				value=value.replace("[", "");
+				value=value.replace("]", "");
+			}
+			
 			out.write(("--" + boundary + "\r\n").getBytes());
 			out.write(("Content-Disposition: form-data; name=\"" + name + "\"\r\n").getBytes());
 			out.write(("\r\n").getBytes());
