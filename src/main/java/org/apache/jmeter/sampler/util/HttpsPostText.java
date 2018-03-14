@@ -41,6 +41,23 @@ public class HttpsPostText{
 		return textParams;
 	}
 
+	public Map<Object, Object> mapToObj(Map<String, String> map){
+		Map<Object, Object> objMap = new HashMap<Object, Object>();
+		Set<String> keys = map.keySet();
+		for (String key : keys) {
+			String value = map.get(key);
+			String start = "[";
+			String end = "]";
+			if (value.startsWith(start)&&value.endsWith(end)) {
+				value=value.replace("[", "");
+				value=value.replace("]", "");
+				objMap.put(key, value.split(","));
+			}else {
+				objMap.put(key, value);
+			}
+		}
+		return objMap;
+	}
 	public void setTextParams(Map<String, String> textParams) {
 		this.textParams = textParams;
 	}
@@ -102,7 +119,8 @@ public class HttpsPostText{
 	}
 	// 普通字符串数据
 	private void writeTextParams(OutputStream out) throws Exception {
-		String paramsData=JSONObject.fromObject(getTextParams()).toString();
+		Map<Object, Object> parametersMap = mapToObj(getTextParams());
+		String paramsData=JSONObject.fromObject(parametersMap).toString();
 		logger.info(paramsData);
 		byte[] data = paramsData.getBytes();
 		out.write(data);

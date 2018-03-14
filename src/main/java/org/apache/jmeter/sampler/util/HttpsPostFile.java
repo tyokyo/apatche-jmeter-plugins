@@ -18,10 +18,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+
 import org.apache.jmeter.protocol.http.sampler.HTTPSampleResult;
 import org.apache.jmeter.sampler.util.MyX509TrustManager;
 import org.apache.jmeter.samplers.SampleResult;
