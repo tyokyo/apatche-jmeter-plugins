@@ -54,7 +54,7 @@
 						<configuration>
 							<target>
 								<property name="JMETER_HOME" value="env.JMETER_HOME" />
-								<property name="target_file" value="ApatcheJMeter_ckt-0.3.jar" />
+								<property name="target_file" value="ApatcheJMeter_ckt-${version}.jar" />
 								<property name="from" value="target/${target_file}" />
 								<property name="to" value="${JMETER_HOME}/lib/ext" />
 								<echo message="copy file from ${from} to ${to}" />
