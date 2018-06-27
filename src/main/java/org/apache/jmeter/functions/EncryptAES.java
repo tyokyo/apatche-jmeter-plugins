@@ -96,7 +96,7 @@ public class EncryptAES extends AbstractFunction {
 	public synchronized String execute(SampleResult previousResult, Sampler currentSampler)
 			throws InvalidVariableException {
 		String sSrc = new String(((CompoundVariable) values[0]).execute().trim());
-		String sKey="sioeye2_rest1.0*";
+		String sKey="sioeye2_rest2.0*";
 		String encryptString="";;
 		try {
 			encryptString = Encrypt(sSrc, sKey);

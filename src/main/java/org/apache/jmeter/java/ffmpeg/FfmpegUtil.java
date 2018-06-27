@@ -107,6 +107,7 @@ public class FfmpegUtil
 		try
 		{
 			Process p = Runtime.getRuntime().exec(commands);
+			System.out.println(commands);
 			logger.info("excute ok!" + commands);
 			StreamCaptureThread errorStream = new StreamCaptureThread(p.getErrorStream(), "A");
 			StreamCaptureThread outputStream = new StreamCaptureThread(p.getInputStream(), "B");
