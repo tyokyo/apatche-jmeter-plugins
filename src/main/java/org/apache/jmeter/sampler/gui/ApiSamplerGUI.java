@@ -105,7 +105,7 @@ public class ApiSamplerGUI extends AbstractSamplerGui implements ActionListener{
 	private static JRadioButton sessionTokenRadioButton;
 	private static JLabeledTextField varsTextField;
 	private static JLabeledTextField methodTextField;
-	private static JLabeledTextField serverUrlTextField;
+	private static JLabeledTextField serverUrlTextField; 
 	private static HeaderTableModel headerModel;
 	private static JTabbedPane jTabbedPane;
 	public static JTable headerTable;

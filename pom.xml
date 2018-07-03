@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>kg.apc</groupId>
 	<artifactId>ApatcheJMeter_ckt</artifactId>
-	<version>0.3</version>
+	<version>0.4</version>
 	<name>apatche jmeter extend plugins</name>
 	<description>Evelyn Plugins</description>
 	<licenses>
@@ -60,7 +60,9 @@
 								<echo message="copy file from ${from} to ${to}" />
 								<!-- <delete file="${servicemix_path}/${target_file}"></delete> -->
 								<copy file="${from}" todir="${to}/" />
-								<!-- <copy file="${from}" todir="\\192.168.153.136\jmeter\lib\ext\" /> -->
+								<copy file="${from}" todir="D:/soft/Jmeter/apache-jmeter-4.0/lib/ext" />
+								<!-- <copy file="${from}" todir="\\192.168.153.136\jmeter\lib\ext\" 
+									/> -->
 							</target>
 						</configuration>
 					</execution>
@@ -71,8 +73,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 	<dependencies>
 		<dependency>

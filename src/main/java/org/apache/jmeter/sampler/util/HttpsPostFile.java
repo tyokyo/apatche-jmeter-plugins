@@ -179,6 +179,7 @@ public class HttpsPostFile{
 
 			//read response data
 			connCode = conn.getResponseCode(); 
+			System.out.println(conn.getResponseCode());
 			//connect success
 			if(connCode == HttpsURLConnection.HTTP_OK) {
 				postInuptStream = conn.getInputStream();
@@ -215,7 +216,55 @@ public class HttpsPostFile{
 			}
 		}
 	}
+	public void send(String method){
+		try {
+			initConnection(method);
+			conn.connect();
+			connOutStream = new DataOutputStream(conn.getOutputStream());
 
+			writeFileParams(connOutStream);
+			writeStringParams(connOutStream);
+			writesEnd(connOutStream);
+
+			//read response data
+			connCode = conn.getResponseCode(); 
+			System.out.println(conn.getResponseCode());
+			//connect success
+			if(connCode == HttpsURLConnection.HTTP_OK) {
+				postInuptStream = conn.getInputStream();
+				String response=coverInputStreamResult(postInuptStream);
+				res.setResponseData(connCode+"\n"+JsonFormatUtil.formatJson(response),null);
+				res.setSuccessful(true);
+			}else{
+				postErrorStream=conn.getErrorStream();
+				String xml = new XmlFormatter().format(coverInputStreamResult(postErrorStream));
+				String response=connCode+"\n"+xml;
+				res.setResponseData(response,null);
+				res.setSuccessful(false);
+			}
+		} catch (Exception e) {
+			errorResult(e, res);
+			res.sampleEnd();
+			logger.warn(e.getMessage());
+		}finally{
+			try {
+				if (connOutStream!=null) {
+					connOutStream.close();
+				}
+				if (conn!=null) {
+					conn.disconnect();
+				}
+				if (postInuptStream!=null) {
+					postInuptStream.close();
+				}
+				if (postErrorStream!=null) {
+					postErrorStream.close();
+				}
+			} catch (Exception e2) {
+				// TODO: handle exception
+			}
+		}
+	}
 	// 文件上传的connection的一些必须设置
 	private void initConnection() throws Exception {
 		StringBuffer buf = new StringBuffer("----");
@@ -255,6 +304,35 @@ public class HttpsPostFile{
 		conn.setRequestProperty("Content-Type","multipart/form-data; boundary=" + boundary);
 
 	}
+	// 文件上传的connection的一些必须设置
+		private void initConnection(String method) throws Exception {
+			StringBuffer buf = new StringBuffer("----");
+			Random rand = new Random();
+			for (int i = 0; i < 15; i++) {
+				buf.append(MULTIPART_CHARS[rand.nextInt(MULTIPART_CHARS.length)]);
+			}
+			this.boundary = buf.toString();
+
+			conn = (HttpsURLConnection) this.url.openConnection();
+			//SSLContext
+			TrustManager[] tm = { new MyX509TrustManager() };
+			SSLContext sslContext;
+			sslContext = SSLContext.getInstance("SSL");
+			sslContext.init(null, tm, new java.security.SecureRandom());
+			//SSLSocketFactory
+			SSLSocketFactory ssf = sslContext.getSocketFactory();
+			conn.setSSLSocketFactory(ssf);
+
+			conn.setDoOutput(true);
+			conn.setDoInput(true);
+			conn.setUseCaches(false);
+			conn.setConnectTimeout(30 * 1000); // 连接超时为10秒
+			conn.setRequestMethod(method);
+			conn.setReadTimeout(30*1000);
+
+			conn.setRequestProperty("Content-Type","multipart/form-data; boundary=" + boundary);
+
+		}
 
 	// 普通字符串数据
 	private void writeStringParams(OutputStream out) throws Exception {
