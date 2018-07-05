@@ -395,6 +395,9 @@ public class HttpsPostFile{
 		} else if (fileName.endsWith(".png")) {
 			return "image/png";
 		}
+		if (fileName.endsWith(".mp4")) {
+			return "video/mp4";
+		}
 		//return "application/octet-stream";
 		return "multipart/form-data";
 	}

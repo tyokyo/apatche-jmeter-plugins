@@ -156,7 +156,7 @@ public class HttpPostUtil2 {
 		conn.setRequestMethod("PUT");
 		conn.setReadTimeout(60*1000);
 
-		conn.setRequestProperty("Content-Type","multipart/form-data; boundary=" + boundary);
+		conn.setRequestProperty("Content-Type","application/octet-stream; boundary=" + boundary);
 
 	}
 
@@ -219,6 +219,9 @@ public class HttpPostUtil2 {
 		} else if (fileName.endsWith(".png")) {
 			return "image/png";
 		}
+		if (fileName.endsWith(".mp4")) {
+			return "video/mp4";
+		}
 		return "application/octet-stream";
 	}
 
@@ -228,8 +231,8 @@ public class HttpPostUtil2 {
 	}
 	
 	public static void main(String  asrg[]){
-		String url= "https://sioeye-disney-tmp-test.s3.cn-north-1.amazonaws.com.cn/origin/2a3b52219e874440a489c8270ecb334f/11fe28dd7d354656b660106dc3308335/215460550a8f43939f4a95774b64bd59/images/474884f4a51f42a1ab5e1c5ed6c1bcb4.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAO7QXSMTQKKQGQWRQ%2F20180703%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Date=20180703T071512Z&X-Amz-Expires=900&X-Amz-Signature=00f4340f1cdcafb5ad10b089866fa74360e9e75c19118fb1e75ee2ce301b0ffd&X-Amz-SignedHeaders=host%3Bx-amz-acl&x-amz-acl=public-read";
-		String file_png = "D:/soft/Jmeter/photo/11hongjie.png";
+		String url= "https://sioeye-disney-tmp-test.s3.cn-north-1.amazonaws.com.cn/origin/2a3b52219e874440a489c8270ecb334f/5ed4d10545284c71b3dc1e57b16e75a8/c57905798a01471f9ba6388d12c2a28a/videos/d46d3c44a7334760bec40892929f8521.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAO7QXSMTQKKQGQWRQ%2F20180705%2Fcn-north-1%2Fs3%2Faws4_request&X-Amz-Date=20180705T050209Z&X-Amz-Expires=900&X-Amz-Signature=43ae4920fe6a52c713722c6da3eb6119f079e4cc051a19202f8843d5d6bdbcb4&X-Amz-SignedHeaders=host%3Bx-amz-acl&x-amz-acl=private";
+		String file_png = "D:/soft/Jmeter/apache-jmeter-3.3/data/video/disney/AmusementPark_video74_segment1.mp4";
 		try {
 			HttpPostUtil2 postUtil = new HttpPostUtil2(url);
 			postUtil.addFileParameter("file",new File(file_png) );
