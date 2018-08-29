@@ -7,11 +7,8 @@
 		<artifactId>jenkins-ci</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
-	
 	<artifactId>jmeter-plugins</artifactId>
-	<name>apatche jmeter extend plugins</name>
-	<description>Evelyn Plugins</description>
-	
+	<packaging>jar</packaging>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
